@@ -1,0 +1,48 @@
+name: restaurant_app
+description: "A new Flutter project."
+publish_to: "none"
+version: 0.1.0
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_local_notifications: ^19.3.1
+  flutter_timezone: ^4.1.1
+  http: ^1.4.0
+  mockito: ^5.4.6
+  path_provider: ^2.1.5
+  provider: ^6.1.5
+  shared_preferences: ^2.5.3
+  sqflite: ^2.4.2
+  timezone: ^0.10.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  build_runner: ^2.4.15
+  integration_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  fonts:
+    - family: IBMPlexSansCondensed
+      fonts:
+        - asset: assets/fonts/IBMPlexSansCondensed-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/IBMPlexSansCondensed-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/IBMPlexSansCondensed-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/IBMPlexSansCondensed-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/IBMPlexSansCondensed-Light.ttf
+          weight: 300
+        - asset: assets/fonts/IBMPlexSansCondensed-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/IBMPlexSansCondensed-Thin.ttf
+          weight: 100

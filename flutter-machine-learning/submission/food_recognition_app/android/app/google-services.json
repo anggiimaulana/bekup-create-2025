@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "835694664722",
+    "project_id": "submission-food-recognition",
+    "storage_bucket": "submission-food-recognition.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:835694664722:android:f7411e653514f880938ccb",
+        "android_client_info": {
+          "package_name": "com.example.food_recognition_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBKVam8Z9v48cCc-us2TWDfLpBSFm6GszU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

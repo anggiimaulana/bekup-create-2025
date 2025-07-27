@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "497149897443",
+    "project_id": "fir-ml-dicoding-35f21",
+    "storage_bucket": "fir-ml-dicoding-35f21.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:497149897443:android:d2c1ce01ad3f076be7b3d6",
+        "android_client_info": {
+          "package_name": "com.example.house_price_predictor_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBwMj-AOlK_OfRDEXuU1PS2wQ-ADEZOjmU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
