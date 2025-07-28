@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:isolate';
-import 'dart:ui';
 import 'package:camera/camera.dart';
+import 'package:flutter/widgets.dart';
 import 'package:image/image.dart' as image_lib;
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:tflite_vision_app_object_detection/model/detected_object.dart';
@@ -9,14 +9,12 @@ import 'package:tflite_vision_app_object_detection/model/detected_object.dart';
 import '../utils/image_utils.dart';
 
 class IsolateInference {
-  // todo-03-isolate-03: setup a state
   static const String _debugName = "TFLITE_INFERENCE";
   final ReceivePort _receivePort = ReceivePort();
   late Isolate _isolate;
   late SendPort _sendPort;
   SendPort get sendPort => _sendPort;
 
-  // todo-03-isolate-04: open the new thread and create a static function
   Future<void> start() async {
     _isolate = await Isolate.spawn<SendPort>(
       entryPoint,
@@ -36,6 +34,7 @@ class IsolateInference {
       final imageMatrix = _imagePreProcessing(cameraImage, inputShape);
 
       final input = [imageMatrix];
+      // todo-02-inference-02: change the output format
       final output = {
         0: [List<List<num>>.filled(10, List<num>.filled(4, 0))],
         1: [List<num>.filled(10, 0)],
@@ -44,11 +43,14 @@ class IsolateInference {
       };
       final address = isolateModel.interpreterAddress;
 
+      // todo-02-inference-03: change parameter type and method inference
       final result = _runInference(input, output, address);
 
+      // todo-02-inference-04: change result preperation
       final labels = isolateModel.labels;
       final detectedObjects = _defineDetectedObject(result, labels);
 
+      // todo-02-inference-05: send the detected objects
       isolateModel.responsePort.send(detectedObjects);
     }
   }
@@ -63,14 +65,18 @@ class IsolateInference {
         .map((list) => list.map((value) => (value * 300)).toList())
         .map((rect) => Rect.fromLTRB(rect[1], rect[0], rect[3], rect[2]))
         .toList();
+
     // Classes
     final classesRaw = result.elementAt(1).first as List<double>;
     final classes = classesRaw.map((value) => value.toInt()).toList();
+
     // Scores
     final scores = result.elementAt(2).first as List<double>;
+
     // Number of detections
     final numberOfDetectionsRaw = result.last.first as double;
     final numberOfDetections = numberOfDetectionsRaw.toInt();
+
     final List<String> classification = [];
     for (var i = 0; i < numberOfDetections; i++) {
       classification.add(labels[classes[i]]);
@@ -81,13 +87,20 @@ class IsolateInference {
     for (int i = 0; i < numberOfDetections; i++) {
       // Prediction score
       var score = scores[i];
+
       // Label string
       var label = classification[i];
+
       recognitions.add(
         DetectedObject(id: i, label: label, score: score, rect: locations[i]),
       );
     }
+
     return recognitions;
+    // locations: Rect location
+    // numberOfDetections: iteration number
+    // scores: confidence score
+    // classication: label
   }
 
   Future<void> close() async {
@@ -136,7 +149,6 @@ class IsolateInference {
   }
 }
 
-// todo-03-isolate-01: create a model class
 class InferenceModel {
   CameraImage? cameraImage;
   int interpreterAddress;

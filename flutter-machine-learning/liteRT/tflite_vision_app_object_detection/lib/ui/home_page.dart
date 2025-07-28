@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:tflite_vision_app_object_detection/controller/object_detection_provider.dart';
 import 'package:tflite_vision_app_object_detection/service/object_detection_service.dart';
 import 'package:tflite_vision_app_object_detection/utils/object_detector_painter.dart';
 import 'package:tflite_vision_app_object_detection/widget/camera_view.dart';
-import 'package:tflite_vision_app_object_detection/widget/classification_item.dart';
-import 'package:provider/provider.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -19,7 +18,6 @@ class HomePage extends StatelessWidget {
       body: ColoredBox(
         color: Colors.black,
         child: Center(
-          // todo-05-ui-01: inject all classes
           child: MultiProvider(
             providers: [
               Provider(create: (context) => ObjectDetectionService()),
@@ -37,7 +35,6 @@ class HomePage extends StatelessWidget {
   }
 }
 
-// todo-05-ui-02: change this widget into StatefulWidget
 class _HomeBody extends StatefulWidget {
   const _HomeBody();
 
@@ -46,7 +43,6 @@ class _HomeBody extends StatefulWidget {
 }
 
 class _HomeBodyState extends State<_HomeBody> {
-  // todo-05-ui-03: setup the provider and dispose it after using it
   late final readViewmodel = context.read<ObjectDetectionViewmodel>();
 
   @override
@@ -57,8 +53,10 @@ class _HomeBodyState extends State<_HomeBody> {
 
   @override
   Widget build(BuildContext context) {
+    // todo-03-ui-07: change it into Consumer and run the runDetection function
     return Consumer<ObjectDetectionViewmodel>(
       builder: (context, value, child) {
+        // todo-03-ui-08: get the state and return the CustomPainter
         final detectedObjects = value.detectedObjects;
 
         return CustomPaint(
@@ -67,7 +65,6 @@ class _HomeBodyState extends State<_HomeBody> {
         );
       },
       child: CameraView(
-        // todo-05-ui-04: add the parameter and run the inference process
         onImage: (cameraImage) async {
           await readViewmodel.runDetection(cameraImage);
         },

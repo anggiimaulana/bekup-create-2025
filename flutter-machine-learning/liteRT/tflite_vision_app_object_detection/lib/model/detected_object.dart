@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+// todo-02-inference-01: create a model class to collect the data
 class DetectedObject {
   int id;
   Rect rect;
@@ -11,4 +12,9 @@ class DetectedObject {
     required this.score,
     required this.label,
   });
+
+  @override
+  String toString() {
+    return 'DetectedObject(id: $id, rect: $rect, score: $score, label: $label)';
+  }
 }
