@@ -8,8 +8,9 @@ class ResultPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Result Page'),
+        iconTheme: IconThemeData(color: Colors.white),
+        backgroundColor: Colors.blueAccent,
+        title: const Text('Result Page', style: TextStyle(color: Colors.white)),
       ),
       body: SafeArea(child: const _ResultBody()),
     );
@@ -46,10 +47,17 @@ class _ResultBodyState extends State<_ResultBody> {
             ),
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16.0),
-          // todo-03: show the inference result (food name and the confidence score)
-          child: ClassificatioinItem(item: "Nasi Lemak", value: "89.58%"),
+        // todo-03: show the inference result (food name and the confidence score)
+        Container(
+          padding: EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.blueAccent,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(25),
+              topRight: Radius.circular(25),
+            ),
+          ),
+          child: ClassificationItem(item: "Nasi Lemak", value: "89.58%"),
         ),
       ],
     );

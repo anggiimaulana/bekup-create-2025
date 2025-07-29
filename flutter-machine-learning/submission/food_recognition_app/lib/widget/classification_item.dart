@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-class ClassificatioinItem extends StatelessWidget {
+class ClassificationItem extends StatelessWidget {
   final String item;
   final String value;
 
-  const ClassificatioinItem({
+  const ClassificationItem({
     super.key,
     required this.item,
     required this.value,
@@ -12,43 +12,42 @@ class ClassificatioinItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          Text(item, style: Theme.of(context).textTheme.headlineMedium),
-          const Spacer(),
-          Text(value, style: Theme.of(context).textTheme.titleMedium),
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
         ],
       ),
-    );
-  }
-}
-
-class ClassificatioinItemShimmer extends StatelessWidget {
-  const ClassificatioinItemShimmer({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          ColoredBox(
-            color: Colors.black,
+          Expanded(
             child: Text(
-              "Food name",
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.headlineMedium,
+              item.length > 30 ? '${item.substring(0, 30)}...' : item,
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
           ),
-          const Spacer(),
-          ColoredBox(
-            color: Colors.black,
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: Text(
-              "34%",
-              style: Theme.of(context).textTheme.headlineMedium,
+              value,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue,
+              ),
             ),
           ),
         ],
