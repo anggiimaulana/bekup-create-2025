@@ -1,11 +1,18 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
+import 'package:food_recognition_app/controller/gallery_prediction_controller.dart';
+import 'package:food_recognition_app/ui/result_page.dart';
 
 class CroppingPage extends StatefulWidget {
   final File imageFile;
+  final GalleryPredictionController predictionController;
 
-  const CroppingPage({super.key, required this.imageFile});
+  const CroppingPage({
+    super.key,
+    required this.imageFile,
+    required this.predictionController,
+  });
 
   @override
   State<CroppingPage> createState() => _CroppingPageState();
@@ -14,7 +21,7 @@ class CroppingPage extends StatefulWidget {
 class _CroppingPageState extends State<CroppingPage> {
   bool _isAnalyzing = false;
   Rect? _cropRect;
-  GlobalKey _imageKey = GlobalKey();
+  final GlobalKey _imageKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -212,14 +219,35 @@ class _CroppingPageState extends State<CroppingPage> {
           '${Directory.systemTemp.path}/cropped_${DateTime.now().millisecondsSinceEpoch}.jpg';
       final croppedFile = await File(tempPath).writeAsBytes(croppedBytes);
 
+      // Initialize prediction controller if needed
+      if (!widget.predictionController.isInitialized) {
+        await widget.predictionController.initialize();
+      }
+
+      // Run prediction on cropped image
+      await widget.predictionController.predictFromFile(croppedFile);
+
       if (mounted) {
-        Navigator.pop(context, croppedFile);
+        // Navigate to result page with predictions
+        await Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ResultPage(
+              imageFile: croppedFile,
+              predictions: widget.predictionController.formattedPredictions,
+            ),
+            settings: const RouteSettings(name: '/result'),
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Crop failed: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Analysis failed: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _isAnalyzing = false);
@@ -227,6 +255,7 @@ class _CroppingPageState extends State<CroppingPage> {
   }
 }
 
+// ResizableCropOverlay class remains the same as original
 class ResizableCropOverlay extends StatefulWidget {
   final File imageFile;
   final Size containerSize;

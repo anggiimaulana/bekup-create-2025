@@ -1,7 +1,10 @@
+import 'dart:async';
+
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:food_recognition_app/controller/image_classification_provider.dart';
 import 'package:food_recognition_app/widget/camera_view.dart';
-import 'package:food_recognition_app/widget/classification_item.dart';
+// import 'package:food_recognition_app/widget/classification_item.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
@@ -14,7 +17,7 @@ class CameraPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.blueAccent,
         title: const Text(
-          'Image Classification',
+          'Camera Classification',
           style: TextStyle(color: Colors.white),
         ),
         iconTheme: const IconThemeData(color: Colors.white),
@@ -45,6 +48,9 @@ class _CameraBodyState extends State<_CameraBody>
   bool _isDisposed = false;
   bool _isInitializing = false;
 
+  Timer? _classificationTimer;
+  CameraImage? _latestCameraImage;
+
   // Keep alive untuk mencegah rebuild yang tidak perlu
   @override
   bool get wantKeepAlive => true;
@@ -55,6 +61,14 @@ class _CameraBodyState extends State<_CameraBody>
       status = await Permission.camera.request();
     }
     return status.isGranted;
+  }
+
+  Color _getConfidenceColor(double value) {
+    final percent = value * 100;
+    if (percent >= 85) return Colors.green;
+    if (percent >= 50) return Colors.orange;
+    if (percent > 0) return Colors.red;
+    return Colors.grey;
   }
 
   @override
@@ -140,6 +154,18 @@ class _CameraBodyState extends State<_CameraBody>
         });
       }
     }
+
+    _classificationTimer = Timer.periodic(const Duration(seconds: 1), (
+      _,
+    ) async {
+      if (!_isDisposed &&
+          _isInitialized &&
+          mounted &&
+          _latestCameraImage != null) {
+        final readViewmodel = context.read<ImageClassificationViewmodel>();
+        await readViewmodel.runClassification(_latestCameraImage!);
+      }
+    });
   }
 
   Future<void> _cleanup() async {
@@ -170,6 +196,8 @@ class _CameraBodyState extends State<_CameraBody>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _classificationTimer?.cancel();
+
     // Cleanup async tanpa await untuk mencegah blocking
     // if (!_isDisposed) {
     //   _cleanup();
@@ -289,18 +317,8 @@ class _CameraBodyState extends State<_CameraBody>
       children: [
         // Camera view
         CameraView(
-          onImage: (cameraImage) async {
-            // Safety check sebelum klasifikasi
-            if (!_isDisposed && _isInitialized && mounted) {
-              try {
-                final readViewmodel = context
-                    .read<ImageClassificationViewmodel>();
-                await readViewmodel.runClassification(cameraImage);
-              } catch (e) {
-                debugPrint('Classification error: $e');
-                // Jangan crash app, just log error
-              }
-            }
+          onImage: (cameraImage) {
+            _latestCameraImage = cameraImage;
           },
         ),
 
@@ -363,16 +381,38 @@ class _CameraBodyState extends State<_CameraBody>
                         ),
                       ),
                       const SizedBox(height: 12),
-                      ...classifications.map(
-                        (classification) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: ClassificationItem(
-                            item: classification.key,
-                            value:
-                                '${(classification.value * 100).toStringAsFixed(1)}%',
+                      ...classifications.map((classification) {
+                        final percent = classification.value * 100;
+                        final color = _getConfidenceColor(classification.value);
+
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: color.withOpacity(0.15),
+                            border: Border.all(color: color),
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                        ),
-                      ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  classification.key,
+                                  style: TextStyle(
+                                    color: color,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                '${percent.toStringAsFixed(1)}%',
+                                style: TextStyle(color: color, fontSize: 16),
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
                     ],
                   ),
                 ),

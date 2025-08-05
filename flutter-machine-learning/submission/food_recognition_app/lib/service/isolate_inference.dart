@@ -1,21 +1,26 @@
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:typed_data';
 import 'package:camera/camera.dart';
+import 'package:food_recognition_app/model/inference_mode.dart';
+import 'dart:math' as math;
 import 'package:image/image.dart' as image_lib;
 import 'package:tflite_flutter/tflite_flutter.dart';
 
 import '../utils/image_utils.dart';
 
-// todo-03-isolate-02: create a class isolate
 class IsolateInference {
-  // todo-03-isolate-03: setup a state
   static const String _debugName = "TFLITE_INFERENCE";
   final ReceivePort _receivePort = ReceivePort();
   late Isolate _isolate;
   late SendPort _sendPort;
   SendPort get sendPort => _sendPort;
 
-  // todo-03-isolate-04: open the new thread and create a static function
+  // FIXED: Add constants for model dimensions
+  static const int MODEL_INPUT_WIDTH = 224;
+  static const int MODEL_INPUT_HEIGHT = 224;
+  static const int MODEL_INPUT_CHANNELS = 3;
+
   Future<void> start() async {
     _isolate = await Isolate.spawn<SendPort>(
       entryPoint,
@@ -30,49 +35,55 @@ class IsolateInference {
     sendPort.send(port.sendPort);
 
     await for (final InferenceModel isolateModel in port) {
-      // todo-03-isolate-05: create a _imagePreProcessing function and run image pre-processing
-      final cameraImage = isolateModel.cameraImage!;
-      final inputShape = isolateModel.inputShape;
-      final imageMatrix = _imagePreProcessing(cameraImage, inputShape);
+      try {
+        final cameraImage = isolateModel.cameraImage!;
 
-      // todo-03-isolate-06: run inference
-      final input = [imageMatrix];
-      final output = [List<int>.filled(isolateModel.outputShape[1], 0)];
-      final address = isolateModel.interpreterAddress;
+        // FIXED: Process image exactly like working version
+        final inputShape = isolateModel.inputShape;
+        final imageMatrix = _imagePreProcessing(cameraImage, inputShape);
 
-      final result = _runInference(input, output, address);
+        // FIXED: Create input and output exactly like working version
+        final input = [imageMatrix];
+        final output = [List<int>.filled(isolateModel.outputShape[1], 0)];
+        final address = isolateModel.interpreterAddress;
 
-      // todo-03-isolate-07: result preperation
-      int maxScore = result.reduce((a, b) => a + b);
-      final keys = isolateModel.labels;
-      final values = result
-          .map((e) => e.toDouble() / maxScore.toDouble())
-          .toList();
+        // Run inference
+        final result = _runInference(input, output, address);
 
-      var classification = Map.fromIterables(keys, values);
-      classification.removeWhere((key, value) => value == 0);
+        // FIXED: Process results exactly like working version
+        int maxScore = result.reduce((a, b) => a + b);
+        final keys = isolateModel.labels;
+        final values = result
+            .map((e) => e.toDouble() / maxScore.toDouble())
+            .toList();
 
-      // todo-03-isolate-08: send the result to main thread
-      isolateModel.responsePort.send(classification);
+        var classification = Map.fromIterables(keys, values);
+        // FIXED: Remove zero values like working version
+        classification.removeWhere((key, value) => value == 0);
+
+        // Send result to main thread
+        isolateModel.responsePort.send(classification);
+      } catch (e) {
+        print('Error in isolate inference: $e');
+        isolateModel.responsePort.send(<String, double>{});
+      }
     }
   }
 
-  // todo-03-isolate-09: close every thread that might be open
-  Future<void> close() async {
-    _isolate.kill();
-    _receivePort.close();
-  }
-
+  // FIXED: Use the same preprocessing as working version
   static List<List<List<num>>> _imagePreProcessing(
     CameraImage cameraImage,
     List<int> inputShape,
   ) {
-    image_lib.Image? img;
-    img = ImageUtils.convertCameraImage(cameraImage);
+    image_lib.Image? img = ImageUtils.convertCameraImage(cameraImage);
+
+    if (img == null) {
+      throw Exception('Failed to convert camera image');
+    }
 
     // resize original image to match model shape.
     image_lib.Image imageInput = image_lib.copyResize(
-      img!,
+      img,
       width: inputShape[1],
       height: inputShape[2],
     );
@@ -91,6 +102,7 @@ class IsolateInference {
     return imageMatrix;
   }
 
+  // FIXED: Use exact same inference method as working version
   static List<int> _runInference(
     List<List<List<List<num>>>> input,
     List<List<int>> output,
@@ -102,22 +114,10 @@ class IsolateInference {
     final result = output.first;
     return result;
   }
-}
 
-// todo-03-isolate-01: create a model class
-class InferenceModel {
-  CameraImage? cameraImage;
-  int interpreterAddress;
-  List<String> labels;
-  List<int> inputShape;
-  List<int> outputShape;
-  late SendPort responsePort;
-
-  InferenceModel(
-    this.cameraImage,
-    this.interpreterAddress,
-    this.labels,
-    this.inputShape,
-    this.outputShape,
-  );
+  // Close isolate
+  Future<void> close() async {
+    _isolate.kill();
+    _receivePort.close();
+  }
 }

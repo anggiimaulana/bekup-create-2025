@@ -83,46 +83,41 @@ class _HomeBody extends StatelessWidget {
                       ),
                     ),
                   ),
-                  onPressed: () async {
-                    // Show loading indicator
-                    showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (context) =>
-                          const Center(child: CircularProgressIndicator()),
-                    );
-
-                    await controller.analyzeSelectedImage();
-
-                    if (context.mounted) {
-                      Navigator.pop(context); // Close loading
-
-                      // Show result (dummy)
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Analysis complete! (Dummy implementation)',
+                  onPressed: controller.isLoading
+                      ? null
+                      : () async {
+                          try {
+                            await controller.analyzeSelectedImage(context);
+                          } catch (e) {
+                            // Error handling sudah ada di controller
+                          }
+                        },
+                  child: controller.isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
                           ),
-                          backgroundColor: Colors.green,
+                        )
+                      : const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.analytics, color: Colors.white),
+                            SizedBox(width: 8),
+                            Text(
+                              "Analyze",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ),
-                      );
-                    }
-                  },
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.analytics, color: Colors.white),
-                      SizedBox(width: 8),
-                      Text(
-                        "Analyze",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
               ),
               const SizedBox(height: 12),
@@ -137,24 +132,37 @@ class _HomeBody extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed: () {
-                    controller.goToCroppingPage(context);
-                  },
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.crop, color: Colors.blueAccent),
-                      SizedBox(width: 8),
-                      Text(
-                        "Crop & Analyze",
-                        style: TextStyle(
-                          color: Colors.blueAccent,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
+                  onPressed: controller.isLoading
+                      ? null
+                      : () {
+                          controller.goToCroppingPage(context);
+                        },
+                  child: controller.isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.blueAccent,
+                            ),
+                          ),
+                        )
+                      : const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.crop, color: Colors.blueAccent),
+                            SizedBox(width: 8),
+                            Text(
+                              "Crop & Analyze",
+                              style: TextStyle(
+                                color: Colors.blueAccent,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
                 ),
               ),
             ] else ...[
@@ -170,24 +178,37 @@ class _HomeBody extends StatelessWidget {
                       ),
                     ),
                   ),
-                  onPressed: () {
-                    controller.goToCameraPage(context);
-                  },
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.camera_alt, color: Colors.white),
-                      SizedBox(width: 8),
-                      Text(
-                        "Open Camera",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
+                  onPressed: controller.isLoading
+                      ? null
+                      : () {
+                          controller.goToCameraPage(context);
+                        },
+                  child: controller.isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
+                          ),
+                        )
+                      : const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.camera_alt, color: Colors.white),
+                            SizedBox(width: 8),
+                            Text(
+                              "Open Camera",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
                 ),
               ),
               const SizedBox(height: 12),
@@ -202,24 +223,37 @@ class _HomeBody extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed: () {
-                    controller.pickImageFromGallery();
-                  },
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.photo_library, color: Colors.blueAccent),
-                      SizedBox(width: 8),
-                      Text(
-                        "Choose from Gallery",
-                        style: TextStyle(
-                          color: Colors.blueAccent,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
+                  onPressed: controller.isLoading
+                      ? null
+                      : () {
+                          controller.pickImageFromGallery();
+                        },
+                  child: controller.isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.blueAccent,
+                            ),
+                          ),
+                        )
+                      : const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.photo_library, color: Colors.blueAccent),
+                            SizedBox(width: 8),
+                            Text(
+                              "Choose from Gallery",
+                              style: TextStyle(
+                                color: Colors.blueAccent,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
                 ),
               ),
             ],

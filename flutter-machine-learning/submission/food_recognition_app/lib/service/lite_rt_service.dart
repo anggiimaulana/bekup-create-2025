@@ -5,7 +5,7 @@ import 'package:food_recognition_app/service/firebase_ml_service.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 
 class LiteRtService {
-  // todo-04: add new property and constructor to get a firebase ml service
+  // add new property and constructor to get a firebase ml service
   final FirebaseMlService _mlService;
 
   LiteRtService(this._mlService);
@@ -18,7 +18,7 @@ class LiteRtService {
   late List outputFormat;
 
   Future<void> initModel() async {
-    // todo-05: replace a asset path, use a model file, load a model from file
+    // replace a asset path, use a model file, load a model from file
     modelFile = await _mlService.loadModel();
 
     final options = InterpreterOptions()

@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/services.dart';
+import 'package:food_recognition_app/model/inference_mode.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 
 import 'isolate_inference.dart';
