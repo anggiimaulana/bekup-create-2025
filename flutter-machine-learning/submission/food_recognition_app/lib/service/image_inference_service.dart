@@ -1,12 +1,11 @@
 import 'dart:developer';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:math' as math;
 import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'firebase_ml_service.dart';
-import 'food_image_preprocessor.dart'; // Import preprocessor yang konsisten
+import 'food_image_preprocessor.dart';
 
 class ImageInferenceService {
   final FirebaseMlService _mlService;
@@ -23,7 +22,7 @@ class ImageInferenceService {
   File? modelFile;
   bool _isInitialized = false;
 
-  // FIXED: Ensure consistent model specifications
+  // Ensure consistent model specifications
   static const int modelInputWidth = 224;
   static const int modelInputHeight = 224;
   static const int modelInputChannels = 3;
@@ -34,16 +33,12 @@ class ImageInferenceService {
     try {
       if (_isInitialized) return;
 
-      log('Initializing ImageInferenceService...');
-
       await _loadLabels();
       await _loadModel();
       _validateModelSpecs();
 
       _isInitialized = true;
-      log('ImageInferenceService initialized successfully');
     } catch (e) {
-      log('Error initializing ImageInferenceService: $e');
       rethrow;
     }
   }
@@ -63,29 +58,15 @@ class ImageInferenceService {
       inputTensor = interpreter.getInputTensors().first;
       outputTensor = interpreter.getOutputTensors().first;
 
-      log('Interpreter loaded successfully from Firebase');
-      log('Input shape: ${inputTensor.shape}, type: ${inputTensor.type}');
-      log('Output shape: ${outputTensor.shape}, type: ${outputTensor.type}');
     } catch (e) {
-      log('Error loading model: $e');
       rethrow;
     }
   }
 
-  // FIXED: More comprehensive model validation
+  // More comprehensive model validation
   void _validateModelSpecs() {
     final inputShape = inputTensor.shape;
     final outputShape = outputTensor.shape;
-
-    log('=== Model Validation ===');
-    log(
-      'Expected input: [1, $modelInputHeight, $modelInputWidth, $modelInputChannels]',
-    );
-    log('Actual input: $inputShape');
-    log('Input tensor type: ${inputTensor.type}');
-    log('Output tensor type: ${outputTensor.type}');
-    log('Expected output size: $expectedOutputSize');
-    log('Actual output shape: $outputShape');
 
     // Validate input shape structure
     if (inputShape.length != 4) {
@@ -182,7 +163,7 @@ class ImageInferenceService {
 
       log('Image decoded successfully: ${image.width}x${image.height}');
 
-      // FIXED: Use consistent preprocessor
+      // Use consistent preprocessor
       final preprocessedData = FoodImagePreprocessor.preprocessFileImage(image);
 
       // Validasi hasil preprocessing
@@ -211,15 +192,13 @@ class ImageInferenceService {
     }
   }
 
-  // REMOVED: Old preprocessing method, now using FoodImagePreprocessor
-
-  // FIXED: Run inference exactly like working camera version
+  // Run inference exactly like working camera version
   Map<String, double> _runInference(List<List<List<num>>> imageMatrix) {
     try {
-      // FIXED: Create input exactly like working camera version
+      // Create input exactly like working camera version
       final input = [imageMatrix];
 
-      // FIXED: Create output exactly like working camera version
+      // Create output exactly like working camera version
       final output = [
         List<int>.filled(outputTensor.shape.reduce((a, b) => a * b), 0),
       ];
@@ -232,7 +211,7 @@ class ImageInferenceService {
 
       log('Inference completed, processing results...');
 
-      // FIXED: Process results exactly like working camera version
+      // Process results exactly like working camera version
       return _processResults(output[0]);
     } catch (e) {
       log('Error running inference: $e');
@@ -240,9 +219,7 @@ class ImageInferenceService {
     }
   }
 
-  // Helper functions to reshape data like in working camera version - REMOVED (not needed)
-
-  // FIXED: Process model output exactly like the working camera version
+  // Process model output exactly like the working camera version
   Map<String, double> _processResults(List<int> output) {
     try {
       if (labels == null || labels!.isEmpty) {
@@ -254,7 +231,7 @@ class ImageInferenceService {
         'Processing results with ${output.length} outputs and ${labels!.length} labels',
       );
 
-      // FIXED: Calculate normalization factor like in working version
+      // Calculate normalization factor like in working version
       int maxScore = output.reduce((a, b) => a + b);
       if (maxScore == 0) maxScore = 1; // Prevent division by zero
 
@@ -265,7 +242,7 @@ class ImageInferenceService {
       for (int i = 0; i < maxIndex; i++) {
         final normalizedValue = output[i].toDouble() / maxScore.toDouble();
 
-        // FIXED: Only include non-zero values like in working version
+        // Only include non-zero values like in working version
         if (normalizedValue > 0) {
           classifications[labels![i]] = normalizedValue;
         }

@@ -30,23 +30,18 @@ class ImageClassificationService {
   // Load model Firebase
   Future<void> _loadModel() async {
     try {
-      if (modelFile != null) return; // ✅ Hindari re-init
+      if (modelFile != null) return;
 
       final options = InterpreterOptions()
         ..useNnApiForAndroid = true
         ..useMetalDelegateForIOS = true;
 
-      modelFile = await _mlService.loadModel(); // ✅ aman sekarang
+      modelFile = await _mlService.loadModel();
       interpreter = Interpreter.fromFile(modelFile!, options: options);
 
       inputTensor = interpreter.getInputTensors().first;
       outputTensor = interpreter.getOutputTensors().first;
-
-      log('Interpreter loaded successfully from Firebase');
-      log('Input shape: ${inputTensor.shape}');
-      log('Output shape: ${outputTensor.shape}');
     } catch (e) {
-      log('Error loading model: $e');
       rethrow;
     }
   }
@@ -54,26 +49,22 @@ class ImageClassificationService {
   // Load labels assets
   Future<void> _loadLabels() async {
     try {
-      if (labels != null) return; // ✅ Hindari reinitialisasi
+      if (labels != null) return;
 
       final labelTxt = await rootBundle.loadString(labelsPath);
       labels = labelTxt.split('\n').where((label) => label.isNotEmpty).toList();
-
-      log('Labels loaded: ${labels!.length} labels');
     } catch (e) {
-      log('Error loading labels: $e');
       rethrow;
     }
   }
 
   // Initialize everything
   bool _isInitialized = false;
+  bool get isInitialized => _isInitialized;
 
   Future<void> initHelper() async {
     try {
       if (_isInitialized) return;
-
-      log('Initializing ImageClassificationService...');
 
       await _loadLabels();
       await _loadModel();
@@ -82,10 +73,7 @@ class ImageClassificationService {
       await isolateInference!.start();
 
       _isInitialized = true;
-
-      log('ImageClassificationService initialized successfully');
     } catch (e) {
-      log('Error initializing ImageClassificationService: $e');
       rethrow;
     }
   }

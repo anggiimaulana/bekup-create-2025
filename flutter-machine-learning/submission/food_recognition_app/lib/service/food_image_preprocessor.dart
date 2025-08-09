@@ -17,8 +17,6 @@ class FoodImagePreprocessor {
     List<int> inputShape,
   ) {
     try {
-      log('Preprocessing camera image...');
-
       img.Image? image = ImageUtils.convertCameraImage(cameraImage);
       if (image == null) {
         throw Exception('Failed to convert camera image');
@@ -27,8 +25,8 @@ class FoodImagePreprocessor {
       // Resize sesuai input shape model
       img.Image imageInput = img.copyResize(
         image,
-        width: inputShape[1], // biasanya 224
-        height: inputShape[2], // biasanya 224
+        width: inputShape[1], 
+        height: inputShape[2],
         interpolation: img.Interpolation.linear,
       );
 
@@ -37,21 +35,17 @@ class FoodImagePreprocessor {
         imageInput = img.copyRotate(imageInput, angle: 90);
       }
 
-      // PENTING: Gunakan RAW pixel values (0-255) seperti versi yang bekerja
+      // Gunakan RAW pixel values (0-255) seperti versi yang bekerja
       final imageMatrix = List.generate(
         imageInput.height,
         (y) => List.generate(imageInput.width, (x) {
           final pixel = imageInput.getPixel(x, y);
-          return [pixel.r, pixel.g, pixel.b]; // RAW values, TIDAK dinormalisasi
+          return [pixel.r, pixel.g, pixel.b];
         }),
       );
 
-      log(
-        'Camera image preprocessed: ${imageMatrix.length}x${imageMatrix[0].length}x${imageMatrix[0][0].length}',
-      );
       return imageMatrix;
     } catch (e) {
-      log('Error preprocessing camera image: $e');
       rethrow;
     }
   }
@@ -63,8 +57,6 @@ class FoodImagePreprocessor {
     int? targetHeight,
   }) {
     try {
-      log('Preprocessing file image: ${image.width}x${image.height}');
-
       final width = targetWidth ?? MODEL_INPUT_WIDTH;
       final height = targetHeight ?? MODEL_INPUT_HEIGHT;
 
@@ -79,21 +71,17 @@ class FoodImagePreprocessor {
       // Pastikan format RGB
       final rgbImage = resizedImage.convert(numChannels: MODEL_INPUT_CHANNELS);
 
-      // PENTING: Gunakan struktur data yang PERSIS SAMA dengan kamera
+      // Gunakan struktur data yang PERSIS SAMA dengan kamera
       final imageMatrix = List.generate(
         rgbImage.height,
         (y) => List.generate(rgbImage.width, (x) {
           final pixel = rgbImage.getPixel(x, y);
-          return [pixel.r, pixel.g, pixel.b]; // RAW values, TIDAK dinormalisasi
+          return [pixel.r, pixel.g, pixel.b]; 
         }),
       );
 
-      log(
-        'File image preprocessed: ${imageMatrix.length}x${imageMatrix[0].length}x${imageMatrix[0][0].length}',
-      );
       return imageMatrix;
     } catch (e) {
-      log('Error preprocessing file image: $e');
       rethrow;
     }
   }
@@ -115,10 +103,6 @@ class FoodImagePreprocessor {
         throw Exception('Image file is empty');
       }
 
-      log(
-        'Loading image file: ${imageFile.path} (${(fileSize / 1024).toStringAsFixed(1)}KB)',
-      );
-
       // Load image
       final image = await img.decodeImageFile(imageFile.path);
       if (image == null) {
@@ -132,7 +116,6 @@ class FoodImagePreprocessor {
         targetHeight: targetHeight,
       );
     } catch (e) {
-      log('Error loading and preprocessing file: $e');
       return null;
     }
   }
@@ -147,8 +130,6 @@ class FoodImagePreprocessor {
       final height = imageMatrix.length;
       final width = imageMatrix[0].length;
       final channels = imageMatrix[0][0].length;
-
-      log('Matrix validation: ${height}x${width}x${channels}');
 
       // Validasi dimensi standar model food recognition
       if (height != MODEL_INPUT_HEIGHT ||
@@ -167,19 +148,14 @@ class FoodImagePreprocessor {
           for (int c = 0; c < channels; c++) {
             final value = imageMatrix[y][x][c];
             if (value < 0 || value > 255) {
-              log(
-                'WARNING: Pixel value out of range [0-255]: $value at [$y][$x][$c]',
-              );
               return false;
             }
           }
         }
       }
 
-      log('Image matrix validation passed');
       return true;
     } catch (e) {
-      log('Error validating image matrix: $e');
       return false;
     }
   }

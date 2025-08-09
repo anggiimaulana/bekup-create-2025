@@ -1,9 +1,7 @@
 import 'dart:io';
 import 'dart:isolate';
-import 'dart:typed_data';
 import 'package:camera/camera.dart';
 import 'package:food_recognition_app/model/inference_mode.dart';
-import 'dart:math' as math;
 import 'package:image/image.dart' as image_lib;
 import 'package:tflite_flutter/tflite_flutter.dart';
 
@@ -16,7 +14,7 @@ class IsolateInference {
   late SendPort _sendPort;
   SendPort get sendPort => _sendPort;
 
-  // FIXED: Add constants for model dimensions
+  // Add constants for model dimensions
   static const int MODEL_INPUT_WIDTH = 224;
   static const int MODEL_INPUT_HEIGHT = 224;
   static const int MODEL_INPUT_CHANNELS = 3;
@@ -38,11 +36,11 @@ class IsolateInference {
       try {
         final cameraImage = isolateModel.cameraImage!;
 
-        // FIXED: Process image exactly like working version
+        // Process image exactly like working version
         final inputShape = isolateModel.inputShape;
         final imageMatrix = _imagePreProcessing(cameraImage, inputShape);
 
-        // FIXED: Create input and output exactly like working version
+        // Create input and output exactly like working version
         final input = [imageMatrix];
         final output = [List<int>.filled(isolateModel.outputShape[1], 0)];
         final address = isolateModel.interpreterAddress;
@@ -50,7 +48,7 @@ class IsolateInference {
         // Run inference
         final result = _runInference(input, output, address);
 
-        // FIXED: Process results exactly like working version
+        // Process results exactly like working version
         int maxScore = result.reduce((a, b) => a + b);
         final keys = isolateModel.labels;
         final values = result
@@ -58,7 +56,7 @@ class IsolateInference {
             .toList();
 
         var classification = Map.fromIterables(keys, values);
-        // FIXED: Remove zero values like working version
+        // Remove zero values like working version
         classification.removeWhere((key, value) => value == 0);
 
         // Send result to main thread
@@ -70,7 +68,7 @@ class IsolateInference {
     }
   }
 
-  // FIXED: Use the same preprocessing as working version
+  // Use the same preprocessing as working version
   static List<List<List<num>>> _imagePreProcessing(
     CameraImage cameraImage,
     List<int> inputShape,
@@ -102,7 +100,7 @@ class IsolateInference {
     return imageMatrix;
   }
 
-  // FIXED: Use exact same inference method as working version
+  // Use exact same inference method as working version
   static List<int> _runInference(
     List<List<List<List<num>>>> input,
     List<List<int>> output,
