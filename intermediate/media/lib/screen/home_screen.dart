@@ -4,6 +4,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:media/provider/upload_provider.dart';
 import 'package:media/screen/camera_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -26,7 +27,9 @@ class _HomePageState extends State<HomePage> {
         actions: [
           IconButton(
             onPressed: () => _onUpload(),
-            icon: const Icon(Icons.upload),
+            icon: context.watch<UploadProvider>().isUploading
+                ? const CircularProgressIndicator(color: Colors.white)
+                : const Icon(Icons.upload),
             tooltip: "Unggah",
           ),
         ],
@@ -70,7 +73,42 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  _onUpload() async {}
+  _onUpload() async {
+    final uploadProvider = context.read<UploadProvider>();
+    final homeProvider = context.read<HomeProvider>();
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+    final imageFile = homeProvider.imageFile;
+    if (imageFile == null) return;
+
+    final fileName = imageFile.name;
+
+    final originalBytes = await imageFile.readAsBytes();
+
+    final compressedBytes = await uploadProvider.compressImage(originalBytes);
+
+    if (compressedBytes.length > 1000000) {
+      scaffoldMessenger.showSnackBar(
+        const SnackBar(content: Text('Ukuran gambar masih > 1MB')),
+      );
+      return;
+    }
+
+    await uploadProvider.upload(
+      compressedBytes,
+      fileName,
+      "Ini adalah deskripsi gambar",
+    );
+
+    if (uploadProvider.uploadResponse != null) {
+      homeProvider.setImageFile(null);
+      homeProvider.setImagePath(null);
+    }
+
+    scaffoldMessenger.showSnackBar(
+      SnackBar(content: Text(uploadProvider.message)),
+    );
+  }
 
   _onGalleryView() async {
     final provider = context.read<HomeProvider>();
