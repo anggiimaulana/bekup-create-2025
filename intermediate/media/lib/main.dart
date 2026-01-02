@@ -4,6 +4,7 @@ import 'provider/home_provider.dart';
 import 'screen/home_screen.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(
     ChangeNotifierProvider(
       create: (context) => HomeProvider(),
