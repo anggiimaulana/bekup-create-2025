@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:localization_accessibility/common.dart';
 
 class PaidPackageCard extends StatelessWidget {
-  const PaidPackageCard({super.key});
+  const PaidPackageCard({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -14,15 +14,15 @@ class PaidPackageCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
-            padding: EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(8.0),
             child: Text(
               AppLocalizations.of(context)!.paidPackageTitle(1),
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 16),
             ),
           ),
           Padding(
-            padding: EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(8.0),
             child: Localizations.override(
               context: context,
               locale: const Locale("id"),

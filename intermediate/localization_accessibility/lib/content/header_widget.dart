@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:localization_accessibility/common.dart';
 
 class CostWidget extends StatelessWidget {
-  const CostWidget({super.key});
+  const CostWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +20,7 @@ class CostWidget extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             AppLocalizations.of(context)!.costSubtitle,
-            style: Theme.of(context).textTheme.headlineMedium,
+            style: Theme.of(context).textTheme.bodyMedium,
             softWrap: true,
             overflow: TextOverflow.fade,
             textAlign: TextAlign.center,

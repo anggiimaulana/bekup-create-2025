@@ -2,11 +2,12 @@ import 'package:app_settings/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:localization_accessibility/content/benefit_widget.dart';
 import 'package:localization_accessibility/content/header_widget.dart';
+import 'package:localization_accessibility/widget/flag_icon_widget.dart';
 import 'package:localization_accessibility/widget/max_width_widget.dart';
 import 'package:localization_accessibility/widget/packet_list.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -18,10 +19,13 @@ class HomePage extends StatelessWidget {
         ),
         title: const Text("Dicoding Academy"),
         actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.flag)),
-          IconButton(onPressed: () {
-            AppSettings.openAppSettings();
-          }, icon: const Icon(Icons.settings)),
+          const FlagIconWidget(),
+          IconButton(
+            onPressed: () {
+              AppSettings.openAppSettings();
+            },
+            icon: const Icon(Icons.settings),
+          ),
         ],
       ),
       body: MaxWidthWidget(
