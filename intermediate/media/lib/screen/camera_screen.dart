@@ -9,8 +9,10 @@ class CameraScreen extends StatefulWidget {
   State<CameraScreen> createState() => _CameraScreenState();
 }
 
-class _CameraScreenState extends State<CameraScreen> {
+class _CameraScreenState extends State<CameraScreen>
+    with WidgetsBindingObserver {
   bool _isCameraInitialized = false;
+  bool _isBackCameraSelected = true;
 
   CameraController? controller;
 
@@ -39,12 +41,29 @@ class _CameraScreenState extends State<CameraScreen> {
 
   @override
   void initState() {
+    WidgetsBinding.instance.addObserver(this);
     onNewCameraSelected(widget.cameras.first);
     super.initState();
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final CameraController? cameraController = controller;
+
+    if (cameraController == null || !cameraController.value.isInitialized) {
+      return;
+    }
+
+    if (state == AppLifecycleState.inactive) {
+      cameraController.dispose();
+    } else if (state == AppLifecycleState.resumed) {
+      onNewCameraSelected(cameraController.description);
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     controller?.dispose();
     super.dispose();
   }
@@ -97,5 +116,15 @@ class _CameraScreenState extends State<CameraScreen> {
     navigator.pop(image);
   }
 
-  void _onCameraSwitch() {}
+  void _onCameraSwitch() {
+    setState(() {
+      _isCameraInitialized = false;
+    });
+
+    onNewCameraSelected(widget.cameras[_isBackCameraSelected ? 1 : 0]);
+
+    setState(() {
+      _isBackCameraSelected = !_isBackCameraSelected;
+    });
+  }
 }
