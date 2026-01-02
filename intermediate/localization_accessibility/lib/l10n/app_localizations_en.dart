@@ -83,4 +83,66 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get benefitFeatureItem3 => 'Send Project';
+
+  @override
+  String get accLogoAppBar => 'Logo Dicoding Academy';
+
+  @override
+  String get accTitleAppBar => 'Dicoding Academy';
+
+  @override
+  String get accHeader =>
+      'Subscription Fee, Choose a subscription package as a learning investment that suits your needs.';
+
+  @override
+  String accPaidPackage(String paidPackageTitle, String paidPackagePrice) {
+    return 'You can get a $paidPackageTitle for $paidPackagePrice';
+  }
+
+  @override
+  String get accPaidPackageButton => 'Choose Package for Subscription';
+
+  @override
+  String get accOrText => 'or';
+
+  @override
+  String accFreePackage(String freePackageTitle, String freePackagePrice) {
+    return 'You can get a trial with $freePackageTitle for $freePackagePrice';
+  }
+
+  @override
+  String get accFreePackageButton => 'Try Now';
+
+  @override
+  String get accBenefitTitle => 'Subscription Benefit';
+
+  @override
+  String accBenefitFeatureItem1(String benefitFeatureItem1) {
+    return '$benefitFeatureItem1 Feature, available on trial subscriptions, available on paid subscriptions.';
+  }
+
+  @override
+  String accBenefitFeatureItem2(String benefitFeatureItem2) {
+    return '$benefitFeatureItem2 Feature, available on trial subscriptions, available on paid subscriptions.';
+  }
+
+  @override
+  String accBenefitFeatureItem3(String benefitFeatureItem3) {
+    return '$benefitFeatureItem3 Feature, not available on trial subscriptions, available on paid subscriptions.';
+  }
+
+  @override
+  String get accChangeLanguage => 'Change Language Setting';
+
+  @override
+  String get accOpenSetting => 'Open settings';
+
+  @override
+  String get accLocaleItem1 => 'Indonesian';
+
+  @override
+  String get accLocaleItem2 => 'Inggris';
+
+  @override
+  String get accLocaleItem3 => 'Arabic';
 }

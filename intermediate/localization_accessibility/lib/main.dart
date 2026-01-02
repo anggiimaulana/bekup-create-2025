@@ -32,6 +32,7 @@ class MyApp extends StatelessWidget {
               ),
             ),
           ),
+          showSemanticsDebugger: true,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           locale: provider.locale,

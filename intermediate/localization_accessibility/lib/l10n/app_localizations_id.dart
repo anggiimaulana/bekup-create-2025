@@ -81,4 +81,66 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get benefitFeatureItem3 => 'Kirim Proyek';
+
+  @override
+  String get accLogoAppBar => 'Logo Dicoding Academy';
+
+  @override
+  String get accTitleAppBar => 'Dicoding Academy';
+
+  @override
+  String get accHeader =>
+      'Biaya Langganan, Pilih paket langganan sebagai investasi belajar yang sesuai dengan kebutuhan Anda.';
+
+  @override
+  String accPaidPackage(String paidPackageTitle, String paidPackagePrice) {
+    return 'Anda dapat $paidPackageTitle dengan biaya $paidPackagePrice';
+  }
+
+  @override
+  String get accPaidPackageButton => 'Pilih Paket untuk berlangganan';
+
+  @override
+  String get accOrText => 'atau';
+
+  @override
+  String accFreePackage(String freePackageTitle, String freePackagePrice) {
+    return 'Anda dapat uji coba dengan $freePackageTitle secara $freePackagePrice';
+  }
+
+  @override
+  String get accFreePackageButton => 'Coba Sekarang';
+
+  @override
+  String get accBenefitTitle => 'Keuntungan Langganan';
+
+  @override
+  String accBenefitFeatureItem1(String benefitFeatureItem1) {
+    return 'Fitur $benefitFeatureItem1, tersedia di langganan uji coba, tersedia di langganan berbayar.';
+  }
+
+  @override
+  String accBenefitFeatureItem2(String benefitFeatureItem2) {
+    return 'Fitur $benefitFeatureItem2, tersedia di langganan uji coba, tersedia di langganan berbayar.';
+  }
+
+  @override
+  String accBenefitFeatureItem3(String benefitFeatureItem3) {
+    return 'Fitur $benefitFeatureItem3, tidak tersedia di langganan uji coba, tersedia di langganan berbayar.';
+  }
+
+  @override
+  String get accChangeLanguage => 'Pengaturan ubah bahasa';
+
+  @override
+  String get accOpenSetting => 'Buka pengaturan';
+
+  @override
+  String get accLocaleItem1 => 'Bahasa Indonesia';
+
+  @override
+  String get accLocaleItem2 => 'Bahasa Inggris';
+
+  @override
+  String get accLocaleItem3 => 'Bahasa Arab';
 }

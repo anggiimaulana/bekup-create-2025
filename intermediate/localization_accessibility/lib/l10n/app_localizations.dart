@@ -201,6 +201,108 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'Kirim Proyek'**
   String get benefitFeatureItem3;
+
+  /// No description provided for @accLogoAppBar.
+  ///
+  /// In id, this message translates to:
+  /// **'Logo Dicoding Academy'**
+  String get accLogoAppBar;
+
+  /// No description provided for @accTitleAppBar.
+  ///
+  /// In id, this message translates to:
+  /// **'Dicoding Academy'**
+  String get accTitleAppBar;
+
+  /// No description provided for @accHeader.
+  ///
+  /// In id, this message translates to:
+  /// **'Biaya Langganan, Pilih paket langganan sebagai investasi belajar yang sesuai dengan kebutuhan Anda.'**
+  String get accHeader;
+
+  /// No description provided for @accPaidPackage.
+  ///
+  /// In id, this message translates to:
+  /// **'Anda dapat {paidPackageTitle} dengan biaya {paidPackagePrice}'**
+  String accPaidPackage(String paidPackageTitle, String paidPackagePrice);
+
+  /// No description provided for @accPaidPackageButton.
+  ///
+  /// In id, this message translates to:
+  /// **'Pilih Paket untuk berlangganan'**
+  String get accPaidPackageButton;
+
+  /// No description provided for @accOrText.
+  ///
+  /// In id, this message translates to:
+  /// **'atau'**
+  String get accOrText;
+
+  /// No description provided for @accFreePackage.
+  ///
+  /// In id, this message translates to:
+  /// **'Anda dapat uji coba dengan {freePackageTitle} secara {freePackagePrice}'**
+  String accFreePackage(String freePackageTitle, String freePackagePrice);
+
+  /// No description provided for @accFreePackageButton.
+  ///
+  /// In id, this message translates to:
+  /// **'Coba Sekarang'**
+  String get accFreePackageButton;
+
+  /// No description provided for @accBenefitTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Keuntungan Langganan'**
+  String get accBenefitTitle;
+
+  /// No description provided for @accBenefitFeatureItem1.
+  ///
+  /// In id, this message translates to:
+  /// **'Fitur {benefitFeatureItem1}, tersedia di langganan uji coba, tersedia di langganan berbayar.'**
+  String accBenefitFeatureItem1(String benefitFeatureItem1);
+
+  /// No description provided for @accBenefitFeatureItem2.
+  ///
+  /// In id, this message translates to:
+  /// **'Fitur {benefitFeatureItem2}, tersedia di langganan uji coba, tersedia di langganan berbayar.'**
+  String accBenefitFeatureItem2(String benefitFeatureItem2);
+
+  /// No description provided for @accBenefitFeatureItem3.
+  ///
+  /// In id, this message translates to:
+  /// **'Fitur {benefitFeatureItem3}, tidak tersedia di langganan uji coba, tersedia di langganan berbayar.'**
+  String accBenefitFeatureItem3(String benefitFeatureItem3);
+
+  /// No description provided for @accChangeLanguage.
+  ///
+  /// In id, this message translates to:
+  /// **'Pengaturan ubah bahasa'**
+  String get accChangeLanguage;
+
+  /// No description provided for @accOpenSetting.
+  ///
+  /// In id, this message translates to:
+  /// **'Buka pengaturan'**
+  String get accOpenSetting;
+
+  /// No description provided for @accLocaleItem1.
+  ///
+  /// In id, this message translates to:
+  /// **'Bahasa Indonesia'**
+  String get accLocaleItem1;
+
+  /// No description provided for @accLocaleItem2.
+  ///
+  /// In id, this message translates to:
+  /// **'Bahasa Inggris'**
+  String get accLocaleItem2;
+
+  /// No description provided for @accLocaleItem3.
+  ///
+  /// In id, this message translates to:
+  /// **'Bahasa Arab'**
+  String get accLocaleItem3;
 }
 
 class _AppLocalizationsDelegate
