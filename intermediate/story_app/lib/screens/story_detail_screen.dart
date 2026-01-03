@@ -24,7 +24,9 @@ class _StoryDetailScreenState extends State<StoryDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _loadStoryDetail();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadStoryDetail();
+    });
   }
 
   Future<void> _loadStoryDetail() async {
@@ -180,6 +182,8 @@ class _StoryDetailScreenState extends State<StoryDetailScreen> {
                                 children: [
                                   Text(
                                     story.name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
@@ -188,6 +192,8 @@ class _StoryDetailScreenState extends State<StoryDetailScreen> {
                                   ),
                                   Text(
                                     dateFormat.format(story.createdAt),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
                                       fontSize: 12,
                                       color: AppConstants.textSecondaryColor,
@@ -237,10 +243,14 @@ class _StoryDetailScreenState extends State<StoryDetailScreen> {
                                   color: AppConstants.primaryColor,
                                 ),
                                 const SizedBox(width: 8),
-                                Text(
-                                  'Location: ${story.lat}, ${story.lon}',
-                                  style: const TextStyle(
-                                    color: AppConstants.textSecondaryColor,
+                                Expanded(
+                                  child: Text(
+                                    'Location: ${story.lat}, ${story.lon}',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      color: AppConstants.textSecondaryColor,
+                                    ),
                                   ),
                                 ),
                               ],
