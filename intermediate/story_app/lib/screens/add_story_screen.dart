@@ -92,7 +92,7 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
+      builder: (bottomSheetContext) => Container(
         decoration: const BoxDecoration(
           color: AppConstants.surfaceColor,
           borderRadius: BorderRadius.only(
@@ -138,7 +138,7 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
                   ),
                   title: Text(l10n.camera),
                   onTap: () {
-                    Navigator.pop(context);
+                    Navigator.of(bottomSheetContext).pop();
                     _pickImageFromCamera();
                   },
                 ),
@@ -156,7 +156,7 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
                   ),
                   title: Text(l10n.gallery),
                   onTap: () {
-                    Navigator.pop(context);
+                    Navigator.of(bottomSheetContext).pop();
                     _pickImageFromGallery();
                   },
                 ),

@@ -28,11 +28,26 @@ class _MyAppState extends State<MyApp> {
     _routerDelegate = AppRouterDelegate();
     _authProvider = AuthProvider();
     _checkAuthStatus();
+    _authProvider.addListener(_onAuthStateChanged);
+  }
+
+  @override
+  void dispose() {
+    _authProvider.removeListener(_onAuthStateChanged);
+    super.dispose();
   }
 
   Future<void> _checkAuthStatus() async {
     await _authProvider.checkAuthStatus();
     _routerDelegate.setAuthStatus(_authProvider.isAuthenticated);
+  }
+
+  void _onAuthStateChanged() {
+    if (!_routerDelegate.isCheckingAuth) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _routerDelegate.setAuthStatus(_authProvider.isAuthenticated);
+      });
+    }
   }
 
   @override
@@ -43,38 +58,29 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (_) => StoryProvider()),
         ChangeNotifierProvider.value(value: _routerDelegate),
       ],
-      child: Consumer<AuthProvider>(
-        builder: (context, authProvider, _) {
-          // Update router when auth state changes
-          if (!_routerDelegate.isCheckingAuth) {
-            _routerDelegate.setAuthStatus(authProvider.isAuthenticated);
-          }
-
-          return MaterialApp.router(
-            title: 'Story App',
-            debugShowCheckedModeBanner: false,
-            theme: ThemeData(
-              primaryColor: AppConstants.primaryColor,
-              scaffoldBackgroundColor: AppConstants.backgroundColor,
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: AppConstants.primaryColor,
-                primary: AppConstants.primaryColor,
-                secondary: AppConstants.primaryColor,
-              ),
-              useMaterial3: true,
-            ),
-            localizationsDelegates: const [
-              AppLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: const [Locale('en'), Locale('id')],
-            routerDelegate: _routerDelegate,
-            routeInformationParser: AppRouteInformationParser(),
-            backButtonDispatcher: RootBackButtonDispatcher(),
-          );
-        },
+      child: MaterialApp.router(
+        title: 'Story App',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          primaryColor: AppConstants.primaryColor,
+          scaffoldBackgroundColor: AppConstants.backgroundColor,
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: AppConstants.primaryColor,
+            primary: AppConstants.primaryColor,
+            secondary: AppConstants.primaryColor,
+          ),
+          useMaterial3: true,
+        ),
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [Locale('en'), Locale('id')],
+        routerDelegate: _routerDelegate,
+        routeInformationParser: AppRouteInformationParser(),
+        backButtonDispatcher: RootBackButtonDispatcher(),
       ),
     );
   }

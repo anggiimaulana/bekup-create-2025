@@ -79,8 +79,19 @@ class _StoryDetailScreenState extends State<StoryDetailScreen> {
                     onPressed: _loadStoryDetail,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppConstants.primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
                     ),
-                    child: const Text('Retry'),
+                    child: const Text(
+                      'Retry',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ],
               ),

@@ -27,7 +27,9 @@ class _StoryListScreenState extends State<StoryListScreen> {
   @override
   void initState() {
     super.initState();
-    _loadStories();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadStories();
+    });
   }
 
   Future<void> _loadStories() async {
@@ -47,7 +49,6 @@ class _StoryListScreenState extends State<StoryListScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final authProvider = context.watch<AuthProvider>();
 
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
@@ -104,8 +105,19 @@ class _StoryListScreenState extends State<StoryListScreen> {
                     onPressed: _loadStories,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppConstants.primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
                     ),
-                    child: const Text('Retry'),
+                    child: const Text(
+                      'Retry',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -155,11 +167,8 @@ class _StoryListScreenState extends State<StoryListScreen> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: widget.onAddStory,
         backgroundColor: AppConstants.primaryColor,
-        icon: const Icon(Icons.add, color: AppConstants.backgroundColor),
-        label: Text(
-          l10n.addStory,
-          style: TextStyle(color: AppConstants.backgroundColor),
-        ),
+        icon: const Icon(Icons.add, color: Colors.white),
+        label: Text(l10n.addStory, style: const TextStyle(color: Colors.white)),
       ),
     );
   }

@@ -169,7 +169,24 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
 
   @override
   Future<void> setNewRoutePath(AppRoutePath configuration) async {
-    // Handle route configuration if needed
+    if (configuration.location == '/login') {
+      _isRegistering = false;
+      _isAuthenticated = false;
+    } else if (configuration.location == '/register') {
+      _isRegistering = true;
+      _isAuthenticated = false;
+    } else if (configuration.location == '/home') {
+      _isAuthenticated = true;
+      _isAddingStory = false;
+      _selectedStory = null;
+    } else if (configuration.location == '/add-story') {
+      _isAuthenticated = true;
+      _isAddingStory = true;
+    } else if (configuration.location == '/story' &&
+        configuration.storyId != null) {
+      _isAuthenticated = true;
+    }
+    notifyListeners();
   }
 }
 
