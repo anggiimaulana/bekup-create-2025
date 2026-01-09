@@ -112,4 +112,8 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get selectImage => 'Pilih Gambar';
+
+  @override
+  String get addLocationStory =>
+      'Tingkatkan ke versi berbayar untuk menambahkan lokasi';
 }

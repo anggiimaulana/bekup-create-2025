@@ -1,3 +1,8 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'story.g.dart';
+
+@JsonSerializable()
 class Story {
   final String id;
   final String name;
@@ -17,31 +22,11 @@ class Story {
     this.lon,
   });
 
-  factory Story.fromJson(Map<String, dynamic> json) {
-    return Story(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      description: json['description'] as String,
-      photoUrl: json['photoUrl'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      lat: json['lat'] as double?,
-      lon: json['lon'] as double?,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'description': description,
-      'photoUrl': photoUrl,
-      'createdAt': createdAt.toIso8601String(),
-      'lat': lat,
-      'lon': lon,
-    };
-  }
+  factory Story.fromJson(Map<String, dynamic> json) => _$StoryFromJson(json);
+  Map<String, dynamic> toJson() => _$StoryToJson(this);
 }
 
+@JsonSerializable()
 class LoginResult {
   final String userId;
   final String name;
@@ -49,11 +34,24 @@ class LoginResult {
 
   LoginResult({required this.userId, required this.name, required this.token});
 
-  factory LoginResult.fromJson(Map<String, dynamic> json) {
-    return LoginResult(
-      userId: json['userId'] as String,
-      name: json['name'] as String,
-      token: json['token'] as String,
-    );
-  }
+  factory LoginResult.fromJson(Map<String, dynamic> json) =>
+      _$LoginResultFromJson(json);
+  Map<String, dynamic> toJson() => _$LoginResultToJson(this);
+}
+
+@JsonSerializable()
+class StoriesResponse {
+  final bool error;
+  final String message;
+  final List<Story> listStory;
+
+  StoriesResponse({
+    required this.error,
+    required this.message,
+    required this.listStory,
+  });
+
+  factory StoriesResponse.fromJson(Map<String, dynamic> json) =>
+      _$StoriesResponseFromJson(json);
+  Map<String, dynamic> toJson() => _$StoriesResponseToJson(this);
 }

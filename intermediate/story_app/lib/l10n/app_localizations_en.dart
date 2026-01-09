@@ -112,4 +112,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get selectImage => 'Select Image';
+
+  @override
+  String get addLocationStory => 'Upgrade to paid version to add location';
 }

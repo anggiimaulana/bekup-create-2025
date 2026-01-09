@@ -307,6 +307,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Select Image'**
   String get selectImage;
+
+  /// No description provided for @addLocationStory.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to paid version to add location'**
+  String get addLocationStory;
 }
 
 class _AppLocalizationsDelegate

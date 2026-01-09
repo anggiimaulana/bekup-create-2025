@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:story_app/l10n/app_localizations.dart';
 import 'package:story_app/routes/route_delegate.dart';
-import 'package:story_app/services/story_provider.dart';
+import 'package:story_app/providers/story_provider.dart';
 import 'package:story_app/utils/constansts.dart';
 import 'providers/auth_provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:story_app/l10n/app_localizations.dart';
-import 'package:story_app/services/story_provider.dart';
+import 'package:story_app/providers/story_provider.dart';
 import 'package:story_app/utils/constansts.dart';
 import '../providers/auth_provider.dart';
 import 'package:intl/intl.dart';
@@ -21,6 +23,10 @@ class StoryDetailScreen extends StatefulWidget {
 }
 
 class _StoryDetailScreenState extends State<StoryDetailScreen> {
+  GoogleMapController? _mapController;
+  String? _address;
+  bool _isLoadingAddress = false;
+
   @override
   void initState() {
     super.initState();
@@ -29,11 +35,50 @@ class _StoryDetailScreenState extends State<StoryDetailScreen> {
     });
   }
 
+  @override
+  void dispose() {
+    _mapController?.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadStoryDetail() async {
     final authProvider = context.read<AuthProvider>();
     final storyProvider = context.read<StoryProvider>();
     if (authProvider.token != null) {
       await storyProvider.getStoryDetail(authProvider.token!, widget.storyId);
+
+      // Load address if location is available
+      final story = storyProvider.selectedStory;
+      if (story != null && story.lat != null && story.lon != null) {
+        _getAddressFromLatLng(story.lat!, story.lon!);
+      }
+    }
+  }
+
+  Future<void> _getAddressFromLatLng(double lat, double lon) async {
+    setState(() {
+      _isLoadingAddress = true;
+    });
+
+    try {
+      final placemarks = await placemarkFromCoordinates(lat, lon);
+
+      if (placemarks.isNotEmpty && mounted) {
+        final place = placemarks.first;
+        setState(() {
+          _address =
+              '${place.street}, ${place.subLocality}, ${place.locality}, ${place.country}';
+          _isLoadingAddress = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _address =
+              'Lat: ${lat.toStringAsFixed(4)}, Lng: ${lon.toStringAsFixed(4)}';
+          _isLoadingAddress = false;
+        });
+      }
     }
   }
 
@@ -100,6 +145,7 @@ class _StoryDetailScreenState extends State<StoryDetailScreen> {
 
           final story = storyProvider.selectedStory!;
           final dateFormat = DateFormat('dd MMM yyyy, HH:mm');
+          final hasLocation = story.lat != null && story.lon != null;
 
           return CustomScrollView(
             slivers: [
@@ -237,8 +283,19 @@ class _StoryDetailScreenState extends State<StoryDetailScreen> {
                         ),
                         const SizedBox(height: 24),
 
-                        // Location info if available
-                        if (story.lat != null && story.lon != null) ...[
+                        // Location Map if available
+                        if (hasLocation) ...[
+                          const Text(
+                            'Location',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: AppConstants.textPrimaryColor,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+
+                          // Address info
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
@@ -250,21 +307,69 @@ class _StoryDetailScreenState extends State<StoryDetailScreen> {
                             child: Row(
                               children: [
                                 const Icon(
-                                  Icons.location_on_outlined,
+                                  Icons.location_on,
                                   color: AppConstants.primaryColor,
+                                  size: 20,
                                 ),
                                 const SizedBox(width: 8),
                                 Expanded(
-                                  child: Text(
-                                    'Location: ${story.lat}, ${story.lon}',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      color: AppConstants.textSecondaryColor,
-                                    ),
-                                  ),
+                                  child: _isLoadingAddress
+                                      ? const Row(
+                                          children: [
+                                            SizedBox(
+                                              width: 12,
+                                              height: 12,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                              ),
+                                            ),
+                                            SizedBox(width: 8),
+                                            Text('Loading address...'),
+                                          ],
+                                        )
+                                      : Text(
+                                          _address ?? 'Location available',
+                                          style: const TextStyle(
+                                            fontSize: 13,
+                                            color:
+                                                AppConstants.textSecondaryColor,
+                                          ),
+                                        ),
                                 ),
                               ],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+
+                          // Map view
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(
+                              AppConstants.borderRadius,
+                            ),
+                            child: SizedBox(
+                              height: 200,
+                              child: GoogleMap(
+                                onMapCreated: (controller) {
+                                  _mapController = controller;
+                                },
+                                initialCameraPosition: CameraPosition(
+                                  target: LatLng(story.lat!, story.lon!),
+                                  zoom: 15,
+                                ),
+                                markers: {
+                                  Marker(
+                                    markerId: MarkerId(story.id),
+                                    position: LatLng(story.lat!, story.lon!),
+                                    infoWindow: InfoWindow(
+                                      title: story.name,
+                                      snippet: _address ?? 'Story location',
+                                    ),
+                                  ),
+                                },
+                                zoomControlsEnabled: false,
+                                myLocationButtonEnabled: false,
+                                mapToolbarEnabled: false,
+                              ),
                             ),
                           ),
                         ],

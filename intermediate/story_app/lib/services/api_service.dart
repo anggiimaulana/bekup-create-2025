@@ -23,7 +23,6 @@ class ApiService {
       if (response.statusCode == 201 || response.statusCode == 200) {
         return {'success': true, 'message': data['message']};
       } else {
-        // Tampilkan pesan error dari API
         return {
           'success': false,
           'message': data['message'] ?? 'Registration failed',
@@ -53,7 +52,6 @@ class ApiService {
           'message': data['message'],
         };
       } else {
-        // Tampilkan pesan error dari API
         return {'success': false, 'message': data['message'] ?? 'Login failed'};
       }
     } catch (e) {
@@ -61,16 +59,17 @@ class ApiService {
     }
   }
 
-  // Get all stories
+  // Get all stories with pagination
   Future<Map<String, dynamic>> getStories(
     String token, {
     int page = 1,
     int size = 10,
+    int location = 0,
   }) async {
     try {
       final response = await http.get(
         Uri.parse(
-          '${AppConstants.baseUrl}${AppConstants.storiesEndpoint}?page=$page&size=$size',
+          '${AppConstants.baseUrl}${AppConstants.storiesEndpoint}?page=$page&size=$size&location=$location',
         ),
         headers: {
           'Authorization': 'Bearer $token',
@@ -84,12 +83,16 @@ class ApiService {
         final List<Story> stories = (data['listStory'] as List)
             .map((story) => Story.fromJson(story))
             .toList();
-        return {'success': true, 'stories': stories};
+
+        // Check if there are more stories (if we got less than size, no more data)
+        final hasMore = stories.length >= size;
+
+        return {'success': true, 'stories': stories, 'hasMore': hasMore};
       } else {
-        return {'success': false, 'message': data['message']};
+        return {'success': false, 'message': data['message'], 'hasMore': false};
       }
     } catch (e) {
-      return {'success': false, 'message': e.toString()};
+      return {'success': false, 'message': e.toString(), 'hasMore': false};
     }
   }
 
@@ -122,12 +125,14 @@ class ApiService {
     }
   }
 
-  // Upload story
+  // Upload story with location
   Future<Map<String, dynamic>> uploadStory(
     String token,
     File imageFile,
-    String description,
-  ) async {
+    String description, {
+    double? lat,
+    double? lon,
+  }) async {
     try {
       final request = http.MultipartRequest(
         'POST',
@@ -136,6 +141,11 @@ class ApiService {
 
       request.headers['Authorization'] = 'Bearer $token';
       request.fields['description'] = description;
+
+      if (lat != null && lon != null) {
+        request.fields['lat'] = lat.toString();
+        request.fields['lon'] = lon.toString();
+      }
 
       final multipartFile = await http.MultipartFile.fromPath(
         'photo',
@@ -147,13 +157,13 @@ class ApiService {
       final response = await http.Response.fromStream(streamedResponse);
       final data = jsonDecode(response.body);
 
-      if (response.statusCode == 201 && !data['error']) {
+      if (response.statusCode == 201 && data['error'] == false) {
         return {'success': true, 'message': data['message']};
       } else {
         return {'success': false, 'message': data['message']};
       }
     } catch (e) {
-      return {'success': false, 'message': e.toString()};
+      return {'success': false, 'message': 'Network error: ${e.toString()}'};
     }
   }
 }
