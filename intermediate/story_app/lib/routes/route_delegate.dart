@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../models/story.dart';
-import '../screens/login_screen.dart';
-import '../screens/register_screen.dart';
-import '../screens/story_list_screen.dart';
-import '../screens/story_detail_screen.dart';
 import '../screens/add_story_screen.dart';
+import '../screens/login_screen.dart';
 import '../screens/map_picker_screen.dart';
+import '../screens/register_screen.dart';
 import '../screens/splash_screen.dart';
+import '../screens/story_detail_screen.dart';
+import '../screens/story_list_screen.dart';
 
 class AppRouterDelegate extends RouterDelegate<AppRoutePath>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<AppRoutePath> {
@@ -87,28 +87,6 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
     notifyListeners();
   }
 
-  void cancelMapPicker() {
-    _isPickingLocation = false;
-    notifyListeners();
-  }
-
-  @override
-  AppRoutePath get currentConfiguration {
-    if (_isCheckingAuth) {
-      return AppRoutePath.splash();
-    }
-    if (!_isAuthenticated) {
-      return _isRegistering ? AppRoutePath.register() : AppRoutePath.login();
-    }
-    if (_isAddingStory) {
-      return AppRoutePath.addStory();
-    }
-    if (_selectedStory != null) {
-      return AppRoutePath.storyDetail(_selectedStory!.id);
-    }
-    return AppRoutePath.home();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Navigator(
@@ -119,7 +97,6 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
             key: ValueKey('SplashPage'),
             child: SplashScreen(),
           ),
-
         if (!_isCheckingAuth && !_isAuthenticated) ...[
           MaterialPage(
             key: const ValueKey('LoginPage'),
@@ -134,7 +111,6 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
               child: RegisterScreen(onRegister: goToLogin, onBack: goToLogin),
             ),
         ],
-
         if (!_isCheckingAuth && _isAuthenticated) ...[
           MaterialPage(
             key: const ValueKey('HomePage'),
@@ -144,7 +120,6 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
               onLogout: logout,
             ),
           ),
-
           if (_isAddingStory)
             MaterialPage(
               key: const ValueKey('AddStoryPage'),
@@ -155,16 +130,17 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
                 selectedLocation: _pickedLocation,
               ),
             ),
-
           if (_isPickingLocation)
             MaterialPage(
               key: const ValueKey('MapPickerPage'),
               child: MapPickerScreen(
                 onConfirm: onLocationPicked,
-                onBack: cancelMapPicker,
+                onBack: () {
+                  _isPickingLocation = false;
+                  notifyListeners();
+                },
               ),
             ),
-
           if (_selectedStory != null)
             MaterialPage(
               key: ValueKey('StoryDetailPage-${_selectedStory!.id}'),
@@ -175,7 +151,6 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
             ),
         ],
       ],
-
       onPopPage: (route, result) {
         if (!route.didPop(result)) return false;
 
@@ -196,28 +171,34 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
   }
 
   @override
+  AppRoutePath get currentConfiguration {
+    if (_isCheckingAuth) return AppRoutePath.splash();
+    if (!_isAuthenticated) {
+      return _isRegistering ? AppRoutePath.register() : AppRoutePath.login();
+    }
+    if (_isAddingStory) return AppRoutePath.addStory();
+    if (_selectedStory != null) {
+      return AppRoutePath.storyDetail(_selectedStory!.id);
+    }
+    return AppRoutePath.home();
+  }
+
+  @override
   Future<void> setNewRoutePath(AppRoutePath configuration) async {
-    switch (configuration.location) {
-      case '/login':
-        _isAuthenticated = false;
-        _isRegistering = false;
-        break;
-      case '/register':
-        _isAuthenticated = false;
-        _isRegistering = true;
-        break;
-      case '/home':
-        _isAuthenticated = true;
-        _isAddingStory = false;
-        _selectedStory = null;
-        break;
-      case '/add-story':
-        _isAuthenticated = true;
-        _isAddingStory = true;
-        break;
-      case '/story':
-        _isAuthenticated = true;
-        break;
+    final location = configuration.location;
+    if (location == '/login') {
+      _isAuthenticated = false;
+      _isRegistering = false;
+    } else if (location == '/register') {
+      _isAuthenticated = false;
+      _isRegistering = true;
+    } else if (location == '/home') {
+      _isAuthenticated = true;
+      _isAddingStory = false;
+      _selectedStory = null;
+    } else if (location == '/add-story') {
+      _isAuthenticated = true;
+      _isAddingStory = true;
     }
     notifyListeners();
   }
@@ -228,14 +209,9 @@ class AppRoutePath {
   final String? storyId;
 
   AppRoutePath.splash() : location = '/splash', storyId = null;
-
   AppRoutePath.login() : location = '/login', storyId = null;
-
   AppRoutePath.register() : location = '/register', storyId = null;
-
   AppRoutePath.home() : location = '/home', storyId = null;
-
   AppRoutePath.addStory() : location = '/add-story', storyId = null;
-
   AppRoutePath.storyDetail(String id) : location = '/story', storyId = id;
 }

@@ -1,16 +1,16 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-import 'package:story_app/providers/story_provider.dart';
-import 'package:story_app/providers/auth_provider.dart';
+import 'package:story_app/config/flavor_config.dart';
 import 'package:story_app/l10n/app_localizations.dart';
+import 'package:story_app/providers/auth_provider.dart';
+import 'package:story_app/providers/story_provider.dart';
 import 'package:story_app/utils/constansts.dart';
 import 'package:story_app/widgets/button_widget.dart';
-import 'package:story_app/config/flavor_config.dart';
 
 class AddStoryScreen extends StatefulWidget {
   final VoidCallback onStoryAdded;
@@ -124,7 +124,7 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
                     ),
                     title: Text(l10n.camera),
                     onTap: () {
-                      Navigator.of(bottomSheetContext).pop();
+                      Navigator.pop(bottomSheetContext);
                       _pickImageFromCamera();
                     },
                   ),
@@ -135,7 +135,7 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
                     ),
                     title: Text(l10n.gallery),
                     onTap: () {
-                      Navigator.of(bottomSheetContext).pop();
+                      Navigator.pop(bottomSheetContext);
                       _pickImageFromGallery();
                     },
                   ),
@@ -227,7 +227,6 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // IMAGE
               GestureDetector(
                 onTap: _showImageSourceDialog,
                 child: Container(
@@ -246,7 +245,7 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
                       ? Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.add_photo_alternate_outlined,
                               size: 64,
                               color: AppConstants.textSecondaryColor,
@@ -268,10 +267,7 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
                         ),
                 ),
               ),
-
               const SizedBox(height: 24),
-
-              // DESCRIPTION
               TextFormField(
                 controller: _descriptionController,
                 maxLines: 5,
@@ -290,10 +286,7 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
                     ? l10n.descriptionRequired
                     : null,
               ),
-
               const SizedBox(height: 24),
-
-              // LOCATION
               if (canAddLocation)
                 ListTile(
                   tileColor: AppConstants.surfaceColor,
@@ -323,10 +316,7 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: widget.onPickLocation,
                 ),
-
               const SizedBox(height: 24),
-
-              // UPLOAD
               Consumer<StoryProvider>(
                 builder: (_, storyProvider, __) {
                   return CustomButton(
