@@ -38,5 +38,9 @@
   "addLocationStory": "Upgrade to paid version to add location",
   "selectedLocation": "Location Selected",
   "unselectedLocation": "Add Location (Optional)",
-  "tapToSelectedLocation": "Tap to select location"
+  "tapToSelectedLocation": "Tap to select location",
+  "pickLocation": "Pick Location",
+  "selectedLocation": "Selected Location",
+  "confirmLocation": "Confirm Location",
+  "loadingAddress": "Loading address..."
 }

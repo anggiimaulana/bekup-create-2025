@@ -117,11 +117,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addLocationStory => 'Upgrade to paid version to add location';
 
   @override
-  String get selectedLocation => 'Location Selected';
+  String get selectedLocation => 'Selected Location';
 
   @override
   String get unselectedLocation => 'Add Location (Optional)';
 
   @override
   String get tapToSelectedLocation => 'Tap to select location';
+
+  @override
+  String get pickLocation => 'Pick Location';
+
+  @override
+  String get confirmLocation => 'Confirm Location';
+
+  @override
+  String get loadingAddress => 'Loading address...';
 }

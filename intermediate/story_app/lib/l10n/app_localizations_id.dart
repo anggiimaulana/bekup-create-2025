@@ -118,11 +118,20 @@ class AppLocalizationsId extends AppLocalizations {
       'Tingkatkan ke versi berbayar untuk menambahkan lokasi';
 
   @override
-  String get selectedLocation => 'Lokasi Dipilih';
+  String get selectedLocation => 'Lokasi Terpilih';
 
   @override
   String get unselectedLocation => 'Tambahkan Lokasi (Opsional)';
 
   @override
   String get tapToSelectedLocation => 'Ketuk untuk memilih lokasi';
+
+  @override
+  String get pickLocation => 'Pilih Lokasi';
+
+  @override
+  String get confirmLocation => 'Konfirmasi Lokasi';
+
+  @override
+  String get loadingAddress => 'Memuat alamat...';
 }

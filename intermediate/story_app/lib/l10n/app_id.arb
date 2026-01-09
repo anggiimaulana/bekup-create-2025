@@ -38,5 +38,9 @@
   "addLocationStory": "Tingkatkan ke versi berbayar untuk menambahkan lokasi",
   "selectedLocation": "Lokasi Dipilih",
   "unselectedLocation": "Tambahkan Lokasi (Opsional)",
-  "tapToSelectedLocation": "Ketuk untuk memilih lokasi"
+  "tapToSelectedLocation": "Ketuk untuk memilih lokasi",
+  "pickLocation": "Pilih Lokasi",
+  "selectedLocation": "Lokasi Terpilih",
+  "confirmLocation": "Konfirmasi Lokasi",
+  "loadingAddress": "Memuat alamat..."
 }

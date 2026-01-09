@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:story_app/l10n/app_localizations.dart';
 import 'package:story_app/utils/constansts.dart';
 
 class MapPickerScreen extends StatefulWidget {
@@ -21,7 +22,7 @@ class MapPickerScreen extends StatefulWidget {
 class _MapPickerScreenState extends State<MapPickerScreen> {
   GoogleMapController? _mapController;
   LatLng? _selectedPosition;
-  String _address = 'Tap on map to select location';
+  String _address = '';
   bool _isLoadingAddress = false;
 
   final LatLng _defaultPosition = const LatLng(-6.2088, 106.8456); // Jakarta
@@ -115,6 +116,8 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
       appBar: AppBar(
@@ -124,9 +127,9 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
           icon: const Icon(Icons.arrow_back, color: AppConstants.primaryColor),
           onPressed: widget.onBack,
         ),
-        title: const Text(
-          'Pick Location',
-          style: TextStyle(
+        title: Text(
+          l10n.pickLocation,
+          style: const TextStyle(
             color: AppConstants.textPrimaryColor,
             fontWeight: FontWeight.bold,
           ),
@@ -136,7 +139,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
             IconButton(
               icon: const Icon(Icons.check, color: AppConstants.primaryColor),
               onPressed: _confirmLocation,
-              tooltip: 'Confirm Location',
+              tooltip: l10n.confirmLocation,
             ),
         ],
       ),
@@ -166,7 +169,6 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
             mapToolbarEnabled: false,
           ),
 
-          // ADDRESS CARD
           Positioned(
             top: 16,
             left: 16,
@@ -182,27 +184,31 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: _isLoadingAddress
-                      ? const Row(
+                      ? Row(
                           children: [
-                            SizedBox(
+                            const SizedBox(
                               width: 12,
                               height: 12,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             ),
-                            SizedBox(width: 8),
-                            Text('Loading address...'),
+                            const SizedBox(width: 8),
+                            Text(l10n.loadingAddress),
                           ],
                         )
                       : Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Selected Location',
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                            Text(
+                              l10n.selectedLocation,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              _address,
+                              _address.isEmpty
+                                  ? l10n.tapToSelectedLocation
+                                  : _address,
                               style: const TextStyle(
                                 fontSize: 12,
                                 color: AppConstants.textSecondaryColor,
@@ -215,7 +221,6 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
             ),
           ),
 
-          // MY LOCATION BUTTON
           Positioned(
             bottom: 100,
             right: 16,
@@ -230,7 +235,6 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
             ),
           ),
 
-          // CONFIRM BUTTON
           if (_selectedPosition != null)
             Positioned(
               bottom: 16,
@@ -246,14 +250,14 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.check_circle),
-                    SizedBox(width: 8),
+                    const Icon(Icons.check_circle),
+                    const SizedBox(width: 8),
                     Text(
-                      'Confirm Location',
-                      style: TextStyle(
+                      l10n.confirmLocation,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),

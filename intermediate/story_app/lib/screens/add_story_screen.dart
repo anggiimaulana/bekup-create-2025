@@ -30,23 +30,55 @@ class AddStoryScreen extends StatefulWidget {
   State<AddStoryScreen> createState() => _AddStoryScreenState();
 }
 
-class _AddStoryScreenState extends State<AddStoryScreen> {
+class _AddStoryScreenState extends State<AddStoryScreen>
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _descriptionController = TextEditingController();
   final _picker = ImagePicker();
 
   File? _imageFile;
 
+  bool _isImagePickerActive = false;
+  late AnimationController _animationController;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _slideAnimation = Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
+        .animate(
+          CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+        );
+  }
+
   @override
   void dispose() {
     _descriptionController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
-  Future<void> _pickImageFromCamera() async {
+  void _toggleImagePicker(bool show) {
+    if (show) {
+      setState(() => _isImagePickerActive = true);
+      _animationController.forward();
+    } else {
+      _animationController.reverse().then((_) {
+        if (mounted) setState(() => _isImagePickerActive = false);
+      });
+    }
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    _toggleImagePicker(false);
+
     try {
       final XFile? image = await _picker.pickImage(
-        source: ImageSource.camera,
+        source: source,
         maxWidth: 1920,
         maxHeight: 1080,
         imageQuality: 85,
@@ -60,92 +92,6 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
     } catch (e) {
       _showError(e.toString());
     }
-  }
-
-  Future<void> _pickImageFromGallery() async {
-    try {
-      final XFile? image = await _picker.pickImage(
-        source: ImageSource.gallery,
-        maxWidth: 1920,
-        maxHeight: 1080,
-        imageQuality: 85,
-      );
-
-      if (image != null) {
-        setState(() {
-          _imageFile = File(image.path);
-        });
-      }
-    } catch (e) {
-      _showError(e.toString());
-    }
-  }
-
-  void _showImageSourceDialog() {
-    final l10n = AppLocalizations.of(context)!;
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (bottomSheetContext) {
-        return Container(
-          decoration: const BoxDecoration(
-            color: AppConstants.surfaceColor,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(AppConstants.defaultPadding),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: AppConstants.textSecondaryColor,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    l10n.selectImage,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppConstants.textPrimaryColor,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  ListTile(
-                    leading: const Icon(
-                      Icons.camera_alt_outlined,
-                      color: AppConstants.primaryColor,
-                    ),
-                    title: Text(l10n.camera),
-                    onTap: () {
-                      Navigator.pop(bottomSheetContext);
-                      _pickImageFromCamera();
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(
-                      Icons.photo_library_outlined,
-                      color: AppConstants.primaryColor,
-                    ),
-                    title: Text(l10n.gallery),
-                    onTap: () {
-                      Navigator.pop(bottomSheetContext);
-                      _pickImageFromGallery();
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
   }
 
   Future<void> _handleUpload() async {
@@ -220,115 +166,188 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppConstants.defaultPadding),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              GestureDetector(
-                onTap: _showImageSourceDialog,
-                child: Container(
-                  height: 250,
-                  decoration: BoxDecoration(
-                    color: AppConstants.surfaceColor,
-                    borderRadius: BorderRadius.circular(
-                      AppConstants.borderRadius,
-                    ),
-                    border: Border.all(
-                      color: AppConstants.textSecondaryColor.withOpacity(0.3),
-                      width: 2,
-                    ),
-                  ),
-                  child: _imageFile == null
-                      ? Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.add_photo_alternate_outlined,
-                              size: 64,
-                              color: AppConstants.textSecondaryColor,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              l10n.selectImage,
-                              style: const TextStyle(
-                                color: AppConstants.textSecondaryColor,
-                              ),
-                            ),
-                          ],
-                        )
-                      : ClipRRect(
-                          borderRadius: BorderRadius.circular(
-                            AppConstants.borderRadius,
-                          ),
-                          child: Image.file(_imageFile!, fit: BoxFit.cover),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(AppConstants.defaultPadding),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  GestureDetector(
+                    onTap: () => _toggleImagePicker(true), // Buka custom sheet
+                    child: Container(
+                      height: 250,
+                      decoration: BoxDecoration(
+                        color: AppConstants.surfaceColor,
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.borderRadius,
                         ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              TextFormField(
-                controller: _descriptionController,
-                maxLines: 5,
-                decoration: InputDecoration(
-                  labelText: l10n.description,
-                  filled: true,
-                  fillColor: AppConstants.surfaceColor,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      AppConstants.borderRadius,
+                        border: Border.all(
+                          color: AppConstants.textSecondaryColor.withOpacity(
+                            0.3,
+                          ),
+                          width: 2,
+                        ),
+                      ),
+                      child: _imageFile == null
+                          ? Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.add_photo_alternate_outlined,
+                                  size: 64,
+                                  color: AppConstants.textSecondaryColor,
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  l10n.selectImage,
+                                  style: const TextStyle(
+                                    color: AppConstants.textSecondaryColor,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : ClipRRect(
+                              borderRadius: BorderRadius.circular(
+                                AppConstants.borderRadius,
+                              ),
+                              child: Image.file(_imageFile!, fit: BoxFit.cover),
+                            ),
                     ),
-                    borderSide: BorderSide.none,
                   ),
-                ),
-                validator: (value) => value == null || value.isEmpty
-                    ? l10n.descriptionRequired
-                    : null,
-              ),
-              const SizedBox(height: 24),
-              if (canAddLocation)
-                ListTile(
-                  tileColor: AppConstants.surfaceColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                      AppConstants.borderRadius,
+                  const SizedBox(height: 24),
+                  TextFormField(
+                    controller: _descriptionController,
+                    maxLines: 5,
+                    decoration: InputDecoration(
+                      labelText: l10n.description,
+                      filled: true,
+                      fillColor: AppConstants.surfaceColor,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.borderRadius,
+                        ),
+                        borderSide: BorderSide.none,
+                      ),
                     ),
+                    validator: (value) => value == null || value.isEmpty
+                        ? l10n.descriptionRequired
+                        : null,
                   ),
-                  leading: Icon(
-                    location != null
-                        ? Icons.location_on
-                        : Icons.location_on_outlined,
-                    color: AppConstants.primaryColor,
+                  const SizedBox(height: 24),
+                  if (canAddLocation)
+                    ListTile(
+                      tileColor: AppConstants.surfaceColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.borderRadius,
+                        ),
+                      ),
+                      leading: Icon(
+                        location != null
+                            ? Icons.location_on
+                            : Icons.location_on_outlined,
+                        color: AppConstants.primaryColor,
+                      ),
+                      title: Text(
+                        location != null
+                            ? l10n
+                                  .selectedLocation 
+                            : l10n.unselectedLocation,
+                      ),
+                      subtitle: location != null
+                          ? Text(
+                              'Lat: ${location.latitude.toStringAsFixed(4)}, '
+                              'Lng: ${location.longitude.toStringAsFixed(4)}',
+                              style: const TextStyle(fontSize: 12),
+                            )
+                          : Text(l10n.tapToSelectedLocation),
+                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                      onTap: widget.onPickLocation,
+                    ),
+                  const SizedBox(height: 24),
+                  Consumer<StoryProvider>(
+                    builder: (_, storyProvider, __) {
+                      return CustomButton(
+                        text: l10n.upload,
+                        isLoading: storyProvider.state == StoryState.uploading,
+                        onPressed: _handleUpload,
+                      );
+                    },
                   ),
-                  title: Text(
-                    location != null
-                        ? l10n.selectedLocation
-                        : l10n.unselectedLocation,
-                  ),
-                  subtitle: location != null
-                      ? Text(
-                          'Lat: ${location.latitude.toStringAsFixed(4)}, '
-                          'Lng: ${location.longitude.toStringAsFixed(4)}',
-                          style: const TextStyle(fontSize: 12),
-                        )
-                      : Text(l10n.tapToSelectedLocation),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: widget.onPickLocation,
-                ),
-              const SizedBox(height: 24),
-              Consumer<StoryProvider>(
-                builder: (_, storyProvider, __) {
-                  return CustomButton(
-                    text: l10n.upload,
-                    isLoading: storyProvider.state == StoryState.uploading,
-                    onPressed: _handleUpload,
-                  );
-                },
+                ],
               ),
-            ],
+            ),
           ),
-        ),
+
+          if (_isImagePickerActive)
+            GestureDetector(
+              onTap: () => _toggleImagePicker(false), // Tutup saat tap luar
+              child: Container(
+                color: Colors.black54,
+                width: double.infinity,
+                height: double.infinity,
+              ),
+            ),
+
+          if (_isImagePickerActive)
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: SlideTransition(
+                position: _slideAnimation,
+                child: Container(
+                  decoration: const BoxDecoration(
+                    color: AppConstants.surfaceColor,
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(24),
+                    ),
+                  ),
+                  padding: const EdgeInsets.all(AppConstants.defaultPadding),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: AppConstants.textSecondaryColor,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        l10n.selectImage,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppConstants.textPrimaryColor,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      ListTile(
+                        leading: const Icon(
+                          Icons.camera_alt_outlined,
+                          color: AppConstants.primaryColor,
+                        ),
+                        title: Text(l10n.camera),
+                        onTap: () => _pickImage(ImageSource.camera),
+                      ),
+                      ListTile(
+                        leading: const Icon(
+                          Icons.photo_library_outlined,
+                          color: AppConstants.primaryColor,
+                        ),
+                        title: Text(l10n.gallery),
+                        onTap: () => _pickImage(ImageSource.gallery),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

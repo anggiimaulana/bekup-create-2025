@@ -317,7 +317,7 @@ abstract class AppLocalizations {
   /// No description provided for @selectedLocation.
   ///
   /// In en, this message translates to:
-  /// **'Location Selected'**
+  /// **'Selected Location'**
   String get selectedLocation;
 
   /// No description provided for @unselectedLocation.
@@ -331,6 +331,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tap to select location'**
   String get tapToSelectedLocation;
+
+  /// No description provided for @pickLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick Location'**
+  String get pickLocation;
+
+  /// No description provided for @confirmLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Location'**
+  String get confirmLocation;
+
+  /// No description provided for @loadingAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading address...'**
+  String get loadingAddress;
 }
 
 class _AppLocalizationsDelegate
