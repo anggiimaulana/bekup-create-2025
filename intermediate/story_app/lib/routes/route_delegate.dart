@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
 import '../models/story.dart';
 import '../screens/login_screen.dart';
 import '../screens/register_screen.dart';
 import '../screens/story_list_screen.dart';
 import '../screens/story_detail_screen.dart';
 import '../screens/add_story_screen.dart';
+import '../screens/map_picker_screen.dart';
 import '../screens/splash_screen.dart';
 
 class AppRouterDelegate extends RouterDelegate<AppRoutePath>
@@ -12,63 +15,80 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
   @override
   final GlobalKey<NavigatorState> navigatorKey;
 
+  AppRouterDelegate() : navigatorKey = GlobalKey<NavigatorState>();
+
   bool _isAuthenticated = false;
   bool _isCheckingAuth = true;
   bool _isRegistering = false;
   bool _isAddingStory = false;
-  Story? _selectedStory;
+  bool _isPickingLocation = false;
 
-  AppRouterDelegate() : navigatorKey = GlobalKey<NavigatorState>();
+  Story? _selectedStory;
+  LatLng? _pickedLocation;
 
   bool get isAuthenticated => _isAuthenticated;
   bool get isCheckingAuth => _isCheckingAuth;
 
-  // Set authentication status
   void setAuthStatus(bool isAuthenticated) {
     _isAuthenticated = isAuthenticated;
     _isCheckingAuth = false;
     notifyListeners();
   }
 
-  // Navigate to register
+  void logout() {
+    _isAuthenticated = false;
+    _isRegistering = false;
+    _isAddingStory = false;
+    _isPickingLocation = false;
+    _selectedStory = null;
+    _pickedLocation = null;
+    notifyListeners();
+  }
+
   void goToRegister() {
     _isRegistering = true;
     notifyListeners();
   }
 
-  // Navigate to login
   void goToLogin() {
     _isRegistering = false;
     _isAddingStory = false;
+    _isPickingLocation = false;
     _selectedStory = null;
     notifyListeners();
   }
 
-  // Navigate to story list (home)
   void goToHome() {
     _isAddingStory = false;
+    _isPickingLocation = false;
     _selectedStory = null;
     notifyListeners();
   }
 
-  // Navigate to story detail
   void goToStoryDetail(Story story) {
     _selectedStory = story;
     notifyListeners();
   }
 
-  // Navigate to add story
   void goToAddStory() {
     _isAddingStory = true;
+    _pickedLocation = null;
     notifyListeners();
   }
 
-  // Handle logout
-  void logout() {
-    _isAuthenticated = false;
-    _isRegistering = false;
-    _isAddingStory = false;
-    _selectedStory = null;
+  void goToMapPicker() {
+    _isPickingLocation = true;
+    notifyListeners();
+  }
+
+  void onLocationPicked(LatLng location) {
+    _pickedLocation = location;
+    _isPickingLocation = false;
+    notifyListeners();
+  }
+
+  void cancelMapPicker() {
+    _isPickingLocation = false;
     notifyListeners();
   }
 
@@ -78,10 +98,7 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
       return AppRoutePath.splash();
     }
     if (!_isAuthenticated) {
-      if (_isRegistering) {
-        return AppRoutePath.register();
-      }
-      return AppRoutePath.login();
+      return _isRegistering ? AppRoutePath.register() : AppRoutePath.login();
     }
     if (_isAddingStory) {
       return AppRoutePath.addStory();
@@ -97,14 +114,12 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
     return Navigator(
       key: navigatorKey,
       pages: [
-        // Splash screen while checking auth
         if (_isCheckingAuth)
           const MaterialPage(
             key: ValueKey('SplashPage'),
             child: SplashScreen(),
           ),
 
-        // Authentication pages
         if (!_isCheckingAuth && !_isAuthenticated) ...[
           MaterialPage(
             key: const ValueKey('LoginPage'),
@@ -120,7 +135,6 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
             ),
         ],
 
-        // Main app pages
         if (!_isCheckingAuth && _isAuthenticated) ...[
           MaterialPage(
             key: const ValueKey('HomePage'),
@@ -130,11 +144,27 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
               onLogout: logout,
             ),
           ),
+
           if (_isAddingStory)
             MaterialPage(
               key: const ValueKey('AddStoryPage'),
-              child: AddStoryScreen(onStoryAdded: goToHome, onBack: goToHome),
+              child: AddStoryScreen(
+                onStoryAdded: goToHome,
+                onBack: goToHome,
+                onPickLocation: goToMapPicker,
+                selectedLocation: _pickedLocation,
+              ),
             ),
+
+          if (_isPickingLocation)
+            MaterialPage(
+              key: const ValueKey('MapPickerPage'),
+              child: MapPickerScreen(
+                onConfirm: onLocationPicked,
+                onBack: cancelMapPicker,
+              ),
+            ),
+
           if (_selectedStory != null)
             MaterialPage(
               key: ValueKey('StoryDetailPage-${_selectedStory!.id}'),
@@ -145,23 +175,21 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
             ),
         ],
       ],
-      onPopPage: (route, result) {
-        if (!route.didPop(result)) {
-          return false;
-        }
 
-        // Handle back navigation
-        if (_selectedStory != null) {
-          _selectedStory = null;
-          notifyListeners();
+      onPopPage: (route, result) {
+        if (!route.didPop(result)) return false;
+
+        if (_isPickingLocation) {
+          _isPickingLocation = false;
         } else if (_isAddingStory) {
           _isAddingStory = false;
-          notifyListeners();
+        } else if (_selectedStory != null) {
+          _selectedStory = null;
         } else if (_isRegistering) {
           _isRegistering = false;
-          notifyListeners();
         }
 
+        notifyListeners();
         return true;
       },
     );
@@ -169,36 +197,45 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
 
   @override
   Future<void> setNewRoutePath(AppRoutePath configuration) async {
-    if (configuration.location == '/login') {
-      _isRegistering = false;
-      _isAuthenticated = false;
-    } else if (configuration.location == '/register') {
-      _isRegistering = true;
-      _isAuthenticated = false;
-    } else if (configuration.location == '/home') {
-      _isAuthenticated = true;
-      _isAddingStory = false;
-      _selectedStory = null;
-    } else if (configuration.location == '/add-story') {
-      _isAuthenticated = true;
-      _isAddingStory = true;
-    } else if (configuration.location == '/story' &&
-        configuration.storyId != null) {
-      _isAuthenticated = true;
+    switch (configuration.location) {
+      case '/login':
+        _isAuthenticated = false;
+        _isRegistering = false;
+        break;
+      case '/register':
+        _isAuthenticated = false;
+        _isRegistering = true;
+        break;
+      case '/home':
+        _isAuthenticated = true;
+        _isAddingStory = false;
+        _selectedStory = null;
+        break;
+      case '/add-story':
+        _isAuthenticated = true;
+        _isAddingStory = true;
+        break;
+      case '/story':
+        _isAuthenticated = true;
+        break;
     }
     notifyListeners();
   }
 }
 
-// Route path configuration
 class AppRoutePath {
   final String? location;
   final String? storyId;
 
   AppRoutePath.splash() : location = '/splash', storyId = null;
+
   AppRoutePath.login() : location = '/login', storyId = null;
+
   AppRoutePath.register() : location = '/register', storyId = null;
+
   AppRoutePath.home() : location = '/home', storyId = null;
+
   AppRoutePath.addStory() : location = '/add-story', storyId = null;
+
   AppRoutePath.storyDetail(String id) : location = '/story', storyId = id;
 }

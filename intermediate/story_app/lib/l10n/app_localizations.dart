@@ -313,6 +313,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Upgrade to paid version to add location'**
   String get addLocationStory;
+
+  /// No description provided for @selectedLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Location Selected'**
+  String get selectedLocation;
+
+  /// No description provided for @unselectedLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Location (Optional)'**
+  String get unselectedLocation;
+
+  /// No description provided for @tapToSelectedLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to select location'**
+  String get tapToSelectedLocation;
 }
 
 class _AppLocalizationsDelegate

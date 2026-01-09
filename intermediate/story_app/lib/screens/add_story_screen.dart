@@ -1,24 +1,29 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+
 import 'package:story_app/providers/story_provider.dart';
+import 'package:story_app/providers/auth_provider.dart';
 import 'package:story_app/l10n/app_localizations.dart';
 import 'package:story_app/utils/constansts.dart';
 import 'package:story_app/widgets/button_widget.dart';
 import 'package:story_app/config/flavor_config.dart';
-import '../providers/auth_provider.dart';
-import 'map_picker_screen.dart';
 
 class AddStoryScreen extends StatefulWidget {
   final VoidCallback onStoryAdded;
   final VoidCallback onBack;
+  final VoidCallback onPickLocation;
+  final LatLng? selectedLocation;
 
   const AddStoryScreen({
     super.key,
     required this.onStoryAdded,
     required this.onBack,
+    required this.onPickLocation,
+    required this.selectedLocation,
   });
 
   @override
@@ -29,8 +34,8 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
   final _formKey = GlobalKey<FormState>();
   final _descriptionController = TextEditingController();
   final _picker = ImagePicker();
+
   File? _imageFile;
-  LatLng? _selectedLocation;
 
   @override
   void dispose() {
@@ -53,14 +58,7 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
         });
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${e.toString()}'),
-            backgroundColor: AppConstants.errorColor,
-          ),
-        );
-      }
+      _showError(e.toString());
     }
   }
 
@@ -79,14 +77,7 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
         });
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${e.toString()}'),
-            backgroundColor: AppConstants.errorColor,
-          ),
-        );
-      }
+      _showError(e.toString());
     }
   }
 
@@ -96,147 +87,121 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (bottomSheetContext) => Container(
-        decoration: const BoxDecoration(
-          color: AppConstants.surfaceColor,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(24),
-            topRight: Radius.circular(24),
+      builder: (bottomSheetContext) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: AppConstants.surfaceColor,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(AppConstants.defaultPadding),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppConstants.textSecondaryColor,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  l10n.selectImage,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppConstants.textPrimaryColor,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                ListTile(
-                  leading: Container(
-                    padding: const EdgeInsets.all(8),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(AppConstants.defaultPadding),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 4,
                     decoration: BoxDecoration(
-                      color: AppConstants.backgroundColor,
-                      borderRadius: BorderRadius.circular(8),
+                      color: AppConstants.textSecondaryColor,
+                      borderRadius: BorderRadius.circular(2),
                     ),
-                    child: const Icon(
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    l10n.selectImage,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppConstants.textPrimaryColor,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  ListTile(
+                    leading: const Icon(
                       Icons.camera_alt_outlined,
                       color: AppConstants.primaryColor,
                     ),
+                    title: Text(l10n.camera),
+                    onTap: () {
+                      Navigator.of(bottomSheetContext).pop();
+                      _pickImageFromCamera();
+                    },
                   ),
-                  title: Text(l10n.camera),
-                  onTap: () {
-                    Navigator.of(bottomSheetContext).pop();
-                    _pickImageFromCamera();
-                  },
-                ),
-                ListTile(
-                  leading: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: AppConstants.backgroundColor,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(
+                  ListTile(
+                    leading: const Icon(
                       Icons.photo_library_outlined,
                       color: AppConstants.primaryColor,
                     ),
+                    title: Text(l10n.gallery),
+                    onTap: () {
+                      Navigator.of(bottomSheetContext).pop();
+                      _pickImageFromGallery();
+                    },
                   ),
-                  title: Text(l10n.gallery),
-                  onTap: () {
-                    Navigator.of(bottomSheetContext).pop();
-                    _pickImageFromGallery();
-                  },
-                ),
-                const SizedBox(height: 16),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
-  }
-
-  Future<void> _pickLocation() async {
-    final result = await Navigator.push<LatLng>(
-      context,
-      MaterialPageRoute(builder: (context) => const MapPickerScreen()),
-    );
-
-    if (result != null) {
-      setState(() {
-        _selectedLocation = result;
-      });
-    }
   }
 
   Future<void> _handleUpload() async {
     if (_imageFile == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context)!.imageRequired),
-          backgroundColor: AppConstants.errorColor,
-        ),
-      );
+      _showError(AppLocalizations.of(context)!.imageRequired);
       return;
     }
 
-    if (_formKey.currentState!.validate()) {
-      final authProvider = context.read<AuthProvider>();
-      final storyProvider = context.read<StoryProvider>();
+    if (!_formKey.currentState!.validate()) return;
 
-      if (authProvider.token == null) return;
+    final authProvider = context.read<AuthProvider>();
+    final storyProvider = context.read<StoryProvider>();
 
-      final success = await storyProvider.uploadStory(
-        authProvider.token!,
-        _imageFile!,
-        _descriptionController.text.trim(),
-        lat: _selectedLocation?.latitude,
-        lon: _selectedLocation?.longitude,
+    if (authProvider.token == null) return;
+
+    final success = await storyProvider.uploadStory(
+      authProvider.token!,
+      _imageFile!,
+      _descriptionController.text.trim(),
+      lat: widget.selectedLocation?.latitude,
+      lon: widget.selectedLocation?.longitude,
+    );
+
+    if (!mounted) return;
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.uploadSuccess),
+          backgroundColor: AppConstants.successColor,
+        ),
       );
-
-      if (success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.uploadSuccess),
-            backgroundColor: AppConstants.successColor,
-          ),
-        );
-        widget.onStoryAdded();
-      } else if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              storyProvider.errorMessage ??
-                  AppLocalizations.of(context)!.uploadFailed,
-            ),
-            backgroundColor: AppConstants.errorColor,
-          ),
-        );
-      }
+      widget.onStoryAdded();
+    } else {
+      _showError(
+        storyProvider.errorMessage ??
+            AppLocalizations.of(context)!.uploadFailed,
+      );
     }
+  }
+
+  void _showError(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: AppConstants.errorColor,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final canAddLocation = FlavorConfig.instance.canAddLocation;
+    final location = widget.selectedLocation;
 
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
@@ -262,7 +227,7 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Image preview
+              // IMAGE
               GestureDetector(
                 onTap: _showImageSourceDialog,
                 child: Container(
@@ -275,7 +240,6 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
                     border: Border.all(
                       color: AppConstants.textSecondaryColor.withOpacity(0.3),
                       width: 2,
-                      style: BorderStyle.solid,
                     ),
                   ),
                   child: _imageFile == null
@@ -292,7 +256,6 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
                               l10n.selectImage,
                               style: const TextStyle(
                                 color: AppConstants.textSecondaryColor,
-                                fontSize: 16,
                               ),
                             ),
                           ],
@@ -305,15 +268,15 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
                         ),
                 ),
               ),
+
               const SizedBox(height: 24),
 
-              // Description field
+              // DESCRIPTION
               TextFormField(
                 controller: _descriptionController,
                 maxLines: 5,
                 decoration: InputDecoration(
                   labelText: l10n.description,
-                  hintText: 'Tell us about this moment...',
                   filled: true,
                   fillColor: AppConstants.surfaceColor,
                   border: OutlineInputBorder(
@@ -322,115 +285,54 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
                     ),
                     borderSide: BorderSide.none,
                   ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      AppConstants.borderRadius,
-                    ),
-                    borderSide: BorderSide.none,
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      AppConstants.borderRadius,
-                    ),
-                    borderSide: const BorderSide(
-                      color: AppConstants.primaryColor,
-                      width: 2,
-                    ),
-                  ),
-                  errorBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      AppConstants.borderRadius,
-                    ),
-                    borderSide: const BorderSide(
-                      color: AppConstants.errorColor,
-                      width: 2,
-                    ),
-                  ),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return l10n.descriptionRequired;
-                  }
-                  return null;
-                },
+                validator: (value) => value == null || value.isEmpty
+                    ? l10n.descriptionRequired
+                    : null,
               ),
+
               const SizedBox(height: 24),
 
-              // Location picker (only for paid version)
-              if (canAddLocation) ...[
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppConstants.surfaceColor,
+              // LOCATION
+              if (canAddLocation)
+                ListTile(
+                  tileColor: AppConstants.surfaceColor,
+                  shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(
                       AppConstants.borderRadius,
                     ),
                   ),
-                  child: ListTile(
-                    leading: Icon(
-                      _selectedLocation != null
-                          ? Icons.location_on
-                          : Icons.location_on_outlined,
-                      color: AppConstants.primaryColor,
-                    ),
-                    title: Text(
-                      _selectedLocation != null
-                          ? 'Location Selected'
-                          : 'Add Location (Optional)',
-                      style: const TextStyle(fontWeight: FontWeight.w500),
-                    ),
-                    subtitle: _selectedLocation != null
-                        ? Text(
-                            'Lat: ${_selectedLocation!.latitude.toStringAsFixed(4)}, '
-                            'Lng: ${_selectedLocation!.longitude.toStringAsFixed(4)}',
-                            style: const TextStyle(fontSize: 12),
-                          )
-                        : const Text('Tap to select location'),
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                    onTap: _pickLocation,
+                  leading: Icon(
+                    location != null
+                        ? Icons.location_on
+                        : Icons.location_on_outlined,
+                    color: AppConstants.primaryColor,
                   ),
+                  title: Text(
+                    location != null
+                        ? l10n.selectedLocation
+                        : l10n.unselectedLocation,
+                  ),
+                  subtitle: location != null
+                      ? Text(
+                          'Lat: ${location.latitude.toStringAsFixed(4)}, '
+                          'Lng: ${location.longitude.toStringAsFixed(4)}',
+                          style: const TextStyle(fontSize: 12),
+                        )
+                      : Text(l10n.tapToSelectedLocation),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: widget.onPickLocation,
                 ),
-                const SizedBox(height: 24),
-              ] else ...[
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppConstants.primaryColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(
-                      AppConstants.borderRadius,
-                    ),
-                    border: Border.all(
-                      color: AppConstants.primaryColor.withOpacity(0.3),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.info_outline,
-                        color: AppConstants.primaryColor,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          l10n.addLocationStory,
-                          style: TextStyle(
-                            color: AppConstants.primaryColor,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
-              ],
 
-              // Upload button
+              const SizedBox(height: 24),
+
+              // UPLOAD
               Consumer<StoryProvider>(
-                builder: (context, storyProvider, _) {
+                builder: (_, storyProvider, __) {
                   return CustomButton(
                     text: l10n.upload,
-                    onPressed: _handleUpload,
                     isLoading: storyProvider.state == StoryState.uploading,
+                    onPressed: _handleUpload,
                   );
                 },
               ),

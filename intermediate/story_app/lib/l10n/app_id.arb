@@ -35,5 +35,8 @@
   "welcomeBack": "Selamat Datang Kembali",
   "createAccount": "Buat Akun",
   "selectImage": "Pilih Gambar",
-  "addLocationStory": "Tingkatkan ke versi berbayar untuk menambahkan lokasi"
+  "addLocationStory": "Tingkatkan ke versi berbayar untuk menambahkan lokasi",
+  "selectedLocation": "Lokasi Dipilih",
+  "unselectedLocation": "Tambahkan Lokasi (Opsional)",
+  "tapToSelectedLocation": "Ketuk untuk memilih lokasi"
 }

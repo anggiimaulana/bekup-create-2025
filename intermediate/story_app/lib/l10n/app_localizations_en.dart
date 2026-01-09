@@ -115,4 +115,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addLocationStory => 'Upgrade to paid version to add location';
+
+  @override
+  String get selectedLocation => 'Location Selected';
+
+  @override
+  String get unselectedLocation => 'Add Location (Optional)';
+
+  @override
+  String get tapToSelectedLocation => 'Tap to select location';
 }

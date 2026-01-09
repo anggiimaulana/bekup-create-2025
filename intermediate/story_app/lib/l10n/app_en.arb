@@ -35,5 +35,8 @@
   "welcomeBack": "Welcome Back",
   "createAccount": "Create Account",
   "selectImage": "Select Image",
-  "addLocationStory": "Upgrade to paid version to add location"
+  "addLocationStory": "Upgrade to paid version to add location",
+  "selectedLocation": "Location Selected",
+  "unselectedLocation": "Add Location (Optional)",
+  "tapToSelectedLocation": "Tap to select location"
 }
